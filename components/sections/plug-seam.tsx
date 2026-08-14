@@ -310,6 +310,9 @@ export function PlugSeam() {
     const plugBar = plugBarRef.current;
     if (!band || !canvas || !socketBar || !plugBar) return;
 
+    // Keep the narrowed element available inside the hoisted frame callback.
+    const mountedCanvas = canvas;
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -481,7 +484,7 @@ export function PlugSeam() {
       if (!stillRef.current) clock += delta;
 
       if (pointerOn) {
-        const rect = canvas.getBoundingClientRect();
+        const rect = mountedCanvas.getBoundingClientRect();
         pointerX = pointerClientX - rect.left;
         pointerY = pointerClientY - rect.top;
       }
