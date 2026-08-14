@@ -1,26 +1,203 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (Tailwind v4). The `.dark` class is set on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #fafafa;
+  --surface-2: #f2f2f2;
+  --foreground: #0a0a0a;
+  --primary: #007aff;
+  --muted-foreground: #666666;
+  --muted: #e5e5e5;
+  --subtle: #8f8f8f;
+  --border: #e6e6e6;
+  --border-strong: #d4d4d4;
+  --accent: #0070f3;
+  --accent-foreground: #ffffff;
+  --success: #0f7b34;
+  --warning: #a35200;
+  --danger: #c72e2e;
+
+  /* Syntax palette. Consumed as inline styles by the code block's Prism
+     theme, so the highlighting flips with `.dark` and never re-renders. */
+  --syntax-plain: #1f2328;
+  --syntax-comment: #6e7781;
+  --syntax-punctuation: #6e7781;
+  --syntax-keyword: #cf222e;
+  --syntax-operator: #cf222e;
+  --syntax-string: #0a3069;
+  --syntax-number: #0550ae;
+  --syntax-function: #8250df;
+  --syntax-class: #953800;
+  --syntax-tag: #116329;
+  --syntax-attr: #0550ae;
+  --syntax-deleted: #82071e;
+}
+
+.dark {
+  --background: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141414;
+  --foreground: #ededed;
+  --primary: #007aff;
+  --muted-foreground: #a6a09b;
+  --muted: #171717;
+  --subtle: #6f6f6f;
+  --border: #1f1f1f;
+  --border-strong: #2e2e2e;
+  --accent: #3291ff;
+  --accent-foreground: #000000;
+  --success: #45d267;
+  --warning: #f5a623;
+  --danger: #ff5c5c;
+
+  --syntax-plain: #e6edf3;
+  --syntax-comment: #8b949e;
+  --syntax-punctuation: #a9b1ba;
+  --syntax-keyword: #ff7b72;
+  --syntax-operator: #ff7b72;
+  --syntax-string: #a5d6ff;
+  --syntax-number: #79c0ff;
+  --syntax-function: #d2a8ff;
+  --syntax-class: #ffa657;
+  --syntax-tag: #7ee787;
+  --syntax-attr: #79c0ff;
+  --syntax-deleted: #ffa198;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter);
+  --font-mono:
+    ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Hairline grid used behind the page rails. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .bg-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--border) 0px,
+      var(--border) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+  }
+
+  /* Rotating headline word — the drum. Each word enters from below the
+     axle and leaves over the top, blurring as it turns away. */
+  .animate-word-in {
+    animation: word-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-word-out {
+    animation: word-out 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Keeps the construction stripes crawling inside the glyphs.
+
+     The tile has to be pinned to one period of the pattern. Left at `auto`
+     the gradient is drawn once at the size of the word and that whole word
+     is what gets repeated — so the moment `background-position` leaves 0, the
+     wrap-around edge slides in from the left, out of phase, because a word is
+     never a whole number of periods wide. That seam is what snaps back when
+     the loop restarts. Sized to the period, every tile meets the next one in
+     phase and there is nothing left to snap. */
+  .animate-stripes {
+    background-size: 28.284px 28.284px;
+    animation: stripes-scroll 1.8s linear infinite;
+  }
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    filter: blur(16px);
+    transform: perspective(700px) rotateX(-82deg) translateY(0.32em);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(700px) rotateX(0deg) translateY(0);
+  }
+}
+
+@keyframes word-out {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: perspective(700px) rotateX(0deg) translateY(0);
+  }
+  to {
+    opacity: 0;
+    filter: blur(16px);
+    transform: perspective(700px) rotateX(82deg) translateY(-0.32em);
+  }
+}
+
+/* One full stripe period, which is also one full tile: the bands repeat every
+   20px along a 45° axis, so the horizontal step that lands back in phase is
+   20 / cos(45°). Has to stay equal to the `background-size` on
+   `.animate-stripes`, or the loop stops closing on itself. */
+@keyframes stripes-scroll {
+  to {
+    background-position: 28.284px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
