@@ -50,11 +50,11 @@ export function Skills() {
       {/* The title band, unchanged. This is the face the seam plugs into, so
           it keeps the full column and the centred setting every other section
           opening on the page uses. */}
-      <div className="flex flex-col items-center gap-4 px-6 pb-24 pt-12 text-center sm:px-8 md:pt-12 md:pb-32">
-        <h2 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
+      <div className="flex flex-col items-center gap-4 px-6 pb-20 pt-12 text-center sm:px-8 md:pt-12 md:pb-32">
+        <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
           Skills &amp; Experience
         </h2>
-        <p className="max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
+        <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
           The tools, the languages and the systems behind everything above — and
           the years that put them there.
         </p>
@@ -80,8 +80,10 @@ export function Skills() {
                   size it could be. */}
               <div className="p-8 sm:p-10">
                 <div className="flex items-center gap-2 text-subtle">
-                  <Mark size={14} weight="Outline" strokeWidth={1.4} />
-                  <Eyebrow>{skill.tag}</Eyebrow>
+                  <Mark size={16} weight="Filled" strokeWidth={1.5} />
+                  <span className="text-base text-muted-foreground text-medium tracking-tight">
+                    {skill.tag}
+                  </span>
                 </div>
 
                 {/* Title and description are one paragraph, not two blocks, the

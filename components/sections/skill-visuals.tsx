@@ -224,7 +224,15 @@ const AI = {
  * share of the width should survive the run being shortened has to be
  * restated.
  */
-const NARROW = { ...AI, hub: 30, lead: 34, tail: 34, spread: 54 };
+const NARROW = {
+  ...AI,
+  node: 14,
+  icon: 14,
+  hub: 20,
+  lead: 40,
+  tail: 34,
+  spread: 34,
+};
 
 type Scene = ReturnType<typeof scene>;
 
@@ -482,7 +490,11 @@ function AiScene({
             shape by the mask above; the outer one glows what comes out of it.
             Both of those are explained on `PULSE`, and neither can move onto
             the paths themselves. */}
-        <g style={{ filter: `drop-shadow(0 0 ${PULSE.glow}px var(--foreground))` }}>
+        <g
+          style={{
+            filter: `drop-shadow(0 0 ${PULSE.glow}px var(--foreground))`,
+          }}
+        >
           <g
             mask={`url(#${id})`}
             style={{ filter: `blur(${PULSE.soften}px)` }}

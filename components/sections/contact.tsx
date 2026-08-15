@@ -39,10 +39,10 @@ export function Contact() {
           </a>
         </div>
 
-        {/* Draws the rule itself, the way a `Cell` does, and keeps the art off
-            it with its own padding — the canvas is in flow, so this is real
-            space above the drawing. */}
-        <ParticleKeyboard className="border-t border-border pt-10 sm:pt-12" />
+        {/* Draws the rule itself, the way a `Cell` does. The air between that
+            rule and the drawing is `layout.padY` inside the component, which
+            puts the same amount underneath — that is what centres it. */}
+        <ParticleKeyboard className="border-t border-border" />
       </Cell>
 
       <Cell className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-border">

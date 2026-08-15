@@ -249,7 +249,8 @@ export function DeviceMirror() {
         ? -(gsap.getProperty(content, "y") as number)
         : window.scrollY;
 
-      const hostRun = document.documentElement.scrollHeight - window.innerHeight;
+      const hostRun =
+        document.documentElement.scrollHeight - window.innerHeight;
       const innerRun = root.scrollHeight - inner.innerHeight;
       if (hostRun <= 0 || innerRun <= 0) return;
 
@@ -323,7 +324,11 @@ export function DeviceMirror() {
           style={{ transform: `scale(${fit})` }}
           className="origin-center will-change-transform"
         >
-          {device === "mac" ? <MacBook>{mirror}</MacBook> : <IPhone>{mirror}</IPhone>}
+          {device === "mac" ? (
+            <MacBook>{mirror}</MacBook>
+          ) : (
+            <IPhone>{mirror}</IPhone>
+          )}
         </div>
       ) : null}
     </div>
@@ -374,7 +379,7 @@ function IPhone({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{ padding: PHONE.bezel, borderRadius: PHONE.radius }}
-      className="relative border border-border-strong bg-surface-2 shadow-sm"
+      className="relative border border-border-strong bg-black shadow-sm"
     >
       <div
         style={{ borderRadius: Math.max(0, PHONE.radius - PHONE.bezel) }}
@@ -382,15 +387,6 @@ function IPhone({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-
-      <div
-        style={{
-          width: PHONE.islandWidth,
-          height: PHONE.islandHeight,
-          top: PHONE.bezel + PHONE.islandTop,
-        }}
-        className="absolute left-1/2 z-10 -translate-x-1/2 rounded-full bg-foreground"
-      />
     </div>
   );
 }

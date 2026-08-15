@@ -46,7 +46,7 @@ const COLUMN = 1200;
  */
 const SHOT = {
   desktop: 1,
-  mobile: 0.88,
+  mobile: 1.6,
 };
 
 /** Close enough to every shot in the rail — they run 1.76 to 2.03. */
@@ -343,9 +343,9 @@ export function Work() {
                     The space between them is spelled out: JSX drops whitespace
                     that spans a newline, so without it the two would butt up
                     against each other. */}
-                <div className="text-pretty text-lg font-medium leading-[1.25] tracking-tight px-4">
+                <div className="text-pretty text-lg font-medium leading-[1.25] tracking-tight px-4 max-w-sm md:max-w-none">
                   <h3 className="inline text-foreground">{item.title}.</h3>{" "}
-                  <p className="inline text-muted-foreground">
+                  <p className="inline text-muted-foreground ">
                     {item.description}
                   </p>
                 </div>

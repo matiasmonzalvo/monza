@@ -75,7 +75,7 @@ const CONFIG = {
      * quarters, so the strokes hold together. Halving this quadruples the
      * count, so raise `max` alongside it.
      */
-    step: 4,
+    step: 3,
     /**
      * 0-255. Skips transparent pixels. This is the gate that does the work for
      * the current art: it is ink on a transparent ground, so low values keep

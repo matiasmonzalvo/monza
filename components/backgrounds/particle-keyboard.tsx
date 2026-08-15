@@ -14,7 +14,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
  *
  * What is different is how a sample is judged. The portrait is ink on nothing,
  * so a pixel is either part of the drawing or it is not. This is a photograph:
- * 88% of it is opaque, and taking all of it would paint a solid slab. So the
+ * ~85% of it is opaque, and taking all of it would paint a solid slab. So the
  * dots are sized by tone instead — the lit edges and legends of the keycaps
  * get the fat ones, the black case falls away to nothing — and the keyboard
  * comes out as a line drawing of itself, every cap outlined and every legend
@@ -35,9 +35,9 @@ const CONFIG = {
 
   /**
    * Where the canvas sits. Unlike the hero's — which fills whatever height the
-   * headline leaves over — this one is in flow and sized by its width, so the
-   * band it takes is exactly as tall as the art at that width. It is the last
-   * thing in the contact cell, so it lands flush on the rule below it.
+   * headline leaves over — this one is in flow: it is centred in its band by
+   * `margin-inline: auto` across and by equal `padY` up and down, so the band
+   * is exactly the art plus that padding, whatever size the art is.
    */
   layout: {
     /**
@@ -48,19 +48,28 @@ const CONFIG = {
      * 1200px frame's own padding starts clipping it.
      */
     width: "min(100%, 1100px)",
+    /**
+     * Air above and below the drawing, and the same on both sides on purpose:
+     * this is what centres it in its band. A viewport-relative middle value so
+     * it opens up on a wide screen without needing a breakpoint of its own.
+     */
+    padY: "clamp(3rem, 5vw, 5rem)",
     /** Nudge off dead centre. "-40px" slides the keyboard left. */
     shift: "0px",
     /**
-     * Where the dots start dissolving, measured down the canvas's own space.
-     * 100% = no fade, and the keyboard's bottom edge lands hard on the rule.
+     * Where the dots start dissolving, measured down the band — padding
+     * included, since the mask covers the whole box. Off at 100%, which is
+     * what `padY` wants: a fade only reads as a fade when the art runs into
+     * the edge it is dissolving against. With air below it instead, it just
+     * thins out the bottom row of keys and the drawing looks off-centre.
      */
-    fadeFrom: "82%",
+    fadeFrom: "100%",
     /**
      * Holds the band's height before the art loads, so nothing under it jumps.
      * Replaced by the PNG's own ratio the moment it arrives — only worth
      * touching if `src` changes shape.
      */
-    ratio: "1000 / 472",
+    ratio: "1962 / 801",
   },
 
   /**
@@ -595,7 +604,11 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
       ref={wrapRef}
       aria-hidden="true"
       className={`pointer-events-none relative w-full overflow-hidden ${className}`.trim()}
-      style={{ maskImage: fade, WebkitMaskImage: fade }}
+      style={{
+        paddingBlock: CONFIG.layout.padY,
+        maskImage: fade,
+        WebkitMaskImage: fade,
+      }}
     >
       <canvas
         ref={canvasRef}
