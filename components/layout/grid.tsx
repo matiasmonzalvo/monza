@@ -50,7 +50,7 @@ export function Frame({
   className?: string;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[1200px] border-x border-border">
+    <div className="mx-auto w-full max-w-6xl border-x border-border">
       <div className={className}>{children}</div>
     </div>
   );

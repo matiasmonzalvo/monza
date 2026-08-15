@@ -36,6 +36,15 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     const content = contentRef.current;
     if (!wrapper || !content) return;
 
+    // The skills grid renders this page again inside an iframe, as the picture
+    // on a laptop screen. That copy must not run a smoother: it is a second
+    // full easing engine on a document nobody scrolls by hand, and it is the
+    // largest thing the mirror would otherwise cost. It also has to not run
+    // for the mirror to be correct — the miniature is driven by setting
+    // `scrollTop`, and a smoother would ease its way there a beat behind the
+    // real page instead of tracking it.
+    if (window.self !== window.top) return;
+
     const mm = gsap.matchMedia();
 
     // Never created when the visitor asked for less motion — the two divs are

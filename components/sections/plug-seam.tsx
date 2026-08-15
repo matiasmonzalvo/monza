@@ -216,8 +216,7 @@ const PLATE = "mx-auto w-[calc(100%_-_2px)] max-w-[1198px]";
  * so fall *inside* the box — which lands them on the very pixels the bar's rim
  * lands on, and the line runs on through the join without a step.
  */
-const NECK =
-  "mx-auto w-full max-w-[1200px] border-x border-border bg-background";
+const NECK = "mx-auto w-full max-w-6xl border-x border-border bg-background";
 
 /**
  * A 1px rim traced around whatever is inside, silhouette and all — the same

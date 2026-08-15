@@ -8,6 +8,7 @@ import habitat from "@/public/habitat.png";
 import hariaz from "@/public/hariaz.png";
 import mazzo from "@/public/mazzo.png";
 import derk from "@/public/derk.png";
+import weekly from "@/public/weekly.png";
 import metro from "@/public/metro.png";
 import myOutfit from "@/public/myoutfit.png";
 
@@ -36,14 +37,15 @@ export const WORK: WorkItem[] = [
     title: "Atiend Calls",
     tag: "Product site",
     description:
-      "Led the end-to-end product development of Atiend Calls, from AI infrastructure and telephony integrations to UX/UI and design system. Built and optimized the marketing website with a strong focus on conversion, performance, and advanced SEO.",
+      "Led the end-to-end product development of Atiend Calls, from AI infrastructure and telephony integrations to UX/UI and design system.",
     image: atiendCalls,
   },
   {
     slug: "atiend",
     title: "Atiend",
     tag: "Product site",
-    description: "Product workflows, Design Engineering",
+    description:
+      "Built an AI-powered messaging dashboard integrated with Meta’s official WhatsApp API, including automated quote generation based on custom pricing formulas.Developed product catalog management and ERP integrations to connect conversations, pricing, and operational data.",
     image: atiend,
   },
 
@@ -51,7 +53,8 @@ export const WORK: WorkItem[] = [
     slug: "derk",
     title: "Derk",
     tag: "Studio site",
-    description: "AI complete platform for ai interfaces into websites. ",
+    description:
+      "Designed and built an AI-powered website widget centered around a conversational input experience, along with the complete management dashboard.",
     image: derk,
   },
   {
@@ -59,7 +62,7 @@ export const WORK: WorkItem[] = [
     title: "Mazzo Developments",
     tag: "Studio site",
     description:
-      "Studio site for a software agency — a strict dark grid, a wireframe globe, and the process laid out step by step.",
+      "Delivered custom software solutions for clients through, typically combining internal admin panels with user-facing web applications.",
     image: mazzo,
   },
   {
@@ -67,24 +70,25 @@ export const WORK: WorkItem[] = [
     title: "Metropolitana Seguros",
     tag: "Studio site",
     description:
-      "Studio site for a software agency — a strict dark grid, a wireframe globe, and the process laid out step by step.",
+      "Built a complete insurance website with a custom design system, SEO-focused architecture, and polished user experience. Developed an API-powered auto insurance quoting flow to generate real-time policy estimates directly from the website.",
     image: metro,
   },
   {
-    slug: "gecko",
-    title: "Gecko",
+    slug: "weekly",
+    title: "Weekly",
     tag: "Product site",
     description:
-      "Landing and feature grid for an end-to-end medical practice platform: records, scheduling and billing in the cloud.",
-    image: gecko,
+      "React Native mobile app for creating and organizing photo grid dumps through a simple, visual-first experience.",
+    image: weekly,
   },
+
   {
-    slug: "myoutfit",
-    title: "My Outfit",
+    slug: "habitat",
+    title: "Habitat Conecta",
     tag: "Web app",
     description:
-      "Catalogue and dressing room on one screen — pick pieces on the left, watch them land on the model on the right.",
-    image: myOutfit,
+      "Split-screen entry point for a neighbourhood platform: the brand on one side, the shortest path to an account on the other.",
+    image: habitat,
   },
   {
     slug: "atp",
@@ -94,13 +98,23 @@ export const WORK: WorkItem[] = [
       "Quoting dashboard with a side-by-side admin panel for assigning requests and tracking every quote through to close.",
     image: atp,
   },
+
   {
-    slug: "habitat",
-    title: "Habitat Conecta",
+    slug: "gecko",
+    title: "Gecko",
+    tag: "Product site",
+    description:
+      "Landing and feature grid for an end-to-end medical practice platform: records, scheduling and billing in the cloud.",
+    image: gecko,
+  },
+
+  {
+    slug: "myoutfit",
+    title: "My Outfit",
     tag: "Web app",
     description:
-      "Split-screen entry point for a neighbourhood platform: the brand on one side, the shortest path to an account on the other.",
-    image: habitat,
+      "Catalogue and dressing room on one screen — pick pieces on the left, watch them land on the model on the right.",
+    image: myOutfit,
   },
   {
     slug: "hariaz",

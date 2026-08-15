@@ -15,8 +15,9 @@ export default function Home() {
         {/* Outside the frame for the same reason as `Work`: the curve that
             closes the hero runs to the screen edge. It brings the column back
             around the facts row, which is where its rails land. */}
-        <Hero />
-
+        <Frame>
+          <Hero />
+        </Frame>
         {/* Deliberately outside the frame: its rail has to run edge to edge,
             which it cannot do from inside a 1200px column. The heading in
             there re-draws the rails so the grid still reads as continuous. */}
@@ -44,9 +45,9 @@ export default function Home() {
             <Skills />
           </Section>
 
-          <Section id="components">
+          {/* <Section id="components">
             <ComponentLibrary />
-          </Section>
+          </Section> */}
 
           <Section id="contact" bordered={false}>
             <Contact />

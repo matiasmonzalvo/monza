@@ -68,9 +68,34 @@ export function RevealText({
       const words = paragraph.querySelectorAll<HTMLElement>("[data-word]");
       if (words.length === 0) return;
 
+      // Dimmed here, up front, and not left to the tween's own `from` to get
+      // around to.
+      //
+      // The bug this fixes: on the very first scroll through the paragraph,
+      // the words AHEAD of the front were not dim — they sat at full opacity,
+      // so what travelled along the block was a single dim word crossing text
+      // that was already lit, the effect exactly inverted. Every pass after
+      // that was correct, which is the tell: by then the tween had rendered
+      // each word at least once, and a word it has touched has a value to go
+      // back to.
+      //
+      // Whatever the tween does or does not write on its first render, this
+      // line makes the answer moot — every word is dim from the moment the
+      // effect runs, and the tween's only job is raising them. Reverted with
+      // the context like everything else in here, so the reduced-motion and
+      // no-JS promise above is unchanged.
+      gsap.set(words, { opacity: CONFIG.dim });
+
       // `amount` hands out the head starts across the whole set, `duration` is
       // what one word then takes — so the timeline runs 1 + softness long and
       // the scrub maps the scroll onto it whatever the word count is.
+      //
+      // Still a `fromTo` rather than a `to` even with the set above, and that
+      // is not belt and braces: `invalidateOnRefresh` makes the tween
+      // re-record its endpoints on every refresh, and a `to` would take
+      // whatever a half-faded word happened to be at that instant as its
+      // start. Spelling both ends out is what keeps a refresh mid-scroll from
+      // quietly rewriting the range.
       gsap.fromTo(
         words,
         { opacity: CONFIG.dim },

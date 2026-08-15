@@ -1,4 +1,5 @@
 import { ArrowRight } from "reicon-react";
+import { ParticleKeyboard } from "@/components/backgrounds/particle-keyboard";
 import { GmailIcon, LinkedInIcon, XIcon } from "@/components/icons/brand";
 import { Cell, CellGrid } from "@/components/layout/grid";
 
@@ -19,19 +20,29 @@ const CHANNELS = [
 export function Contact() {
   return (
     <CellGrid className="grid-cols-1">
-      <Cell className="px-6 py-12 sm:px-8 sm:py-14 w-full flex items-center justify-center flex-col ">
-        <h2 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl ">
-          Get in touch
-        </h2>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Tell me what you are building and let's work on it.
-        </p>
-        <a
-          href={`mailto:${EMAIL}`}
-          className="mt-7 inline-flex h-10 items-center rounded-full border border-foreground bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-transparent hover:text-foreground"
-        >
-          Start a conversation
-        </a>
+      {/* The cell carries no padding of its own so the rule between the copy
+          and the dots can run rail to rail, like every other rule on the page.
+          The padding lives on the two blocks instead. */}
+      <Cell className="w-full overflow-hidden">
+        <div className="flex flex-col items-center justify-center px-6 py-12 sm:px-8 sm:py-14">
+          <h2 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl ">
+            Get in touch
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            Tell me what you are building and let's work on it.
+          </p>
+          <a
+            href={`mailto:${EMAIL}`}
+            className="mt-7 inline-flex h-10 items-center rounded-full border border-foreground bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-transparent hover:text-foreground"
+          >
+            Start a conversation
+          </a>
+        </div>
+
+        {/* Draws the rule itself, the way a `Cell` does, and keeps the art off
+            it with its own padding — the canvas is in flow, so this is real
+            space above the drawing. */}
+        <ParticleKeyboard className="border-t border-border pt-10 sm:pt-12" />
       </Cell>
 
       <Cell className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-border">

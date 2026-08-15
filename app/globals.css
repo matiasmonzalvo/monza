@@ -131,6 +131,136 @@
     );
   }
 
+  /* Skill diagrams scale with the column they sit in; their linework must not.
+     An SVG drawn on a 320-wide stage and shown at 520 renders every 1px
+     hairline at 1.6px, and the whole set stops matching the 1px rules of the
+     grid around it — which is the only reason those drawings read as part of
+     the page rather than as pictures dropped onto it. `*` rather than the root
+     because `vector-effect` does not inherit. */
+  .stroke-fixed * {
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Fades a box out at its own edges, so whatever is moving inside it appears
+     and disappears instead of being cut off by a border.
+
+     Two gradients intersected rather than one: a single `mask-image` can only
+     run along one axis, and `mask-composite: intersect` is what lets the
+     horizontal and the vertical fade multiply into corners instead of the
+     second replacing the first. Safari still wants the `-webkit-` spelling,
+     and its keyword for the same operation is `source-in`.
+
+     `--mask-x` / `--mask-y` are how deep each fade reaches. Set one of them to
+     0% to switch that axis off — which is what the stack marquee does, since
+     it only ever leaves through the sides. */
+  .mask-edges {
+    --mask-x: 12%;
+    --mask-y: 14%;
+    mask-image:
+      linear-gradient(
+        to right,
+        transparent,
+        #000 var(--mask-x),
+        #000 calc(100% - var(--mask-x)),
+        transparent
+      ),
+      linear-gradient(
+        to bottom,
+        transparent,
+        #000 var(--mask-y),
+        #000 calc(100% - var(--mask-y)),
+        transparent
+      );
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  /* Education — a chip flying in at the portrait and being absorbed by it.
+
+     The chip's LAYOUT position is where it comes to rest, on the ring around
+     the portrait. `--from-x` / `--from-y` are only how far outside that it
+     starts, which is what lets one keyframe block serve every direction and,
+     more usefully, lets `transform: none` be a correct static diagram rather
+     than a pile in the middle. See the reduced-motion block at the end of the
+     file, which is exactly that. */
+  .animate-converge {
+    animation: converge var(--converge-duration, 7s) cubic-bezier(0.16, 1, 0.3, 1)
+      infinite both;
+  }
+
+  /* Stack — the marquee rows.
+
+     The track holds its chips twice over and travels exactly half its width,
+     so the frame it ends on is pixel-identical to the one it started on and
+     the loop has no seam to hide. Duplicate the list or the jump is visible. */
+  .animate-marquee {
+    animation: marquee var(--marquee-duration, 44s) linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee var(--marquee-duration, 44s) linear infinite reverse;
+  }
+
+  /* AI-first — the light running down a rail.
+
+     The bead is a single dash on a copy of the rail, and the animation is that
+     dash being walked off the far end. Only the travel is here; a dash has two
+     hard ends and what softens them is a blur and a mask, both of which live in
+     `skill-visuals.tsx` because both are geometry. `--bead-from` parks it just short of the
+     start and `--bead-to` just past the finish; both are set per element,
+     because the two legs cross their rails at different speeds and the numbers
+     ARE the speed — see `bead()` in `skill-visuals.tsx`. Linear and nothing
+     else: a light on a wire does not ease.
+
+     `backwards` is what makes the delay a wait rather than a false start. Six
+     of these share one pair of rails and differ only in when they set off, and
+     without it each would ignore its own opening frame until it first ran —
+     which means sitting at dashoffset 0, mid-rail, in plain sight, for as long
+     as its delay lasts.
+
+     The `vector-effect` reset is not optional. `.stroke-fixed *` above pins
+     every stroke in the diagram to screen pixels, and a stroke measured in
+     screen pixels has its dash pattern measured there too — putting the dash
+     lengths in a different unit from the `pathLength={100}` the offsets are
+     counted in, so the bead would sit somewhere new at every width the cell
+     takes. Written as a descendant of `.stroke-fixed` so it wins on
+     specificity rather than on which of the two happens to come last. */
+  .animate-rail-pulse {
+    animation: rail-pulse var(--pulse-period, 13s) linear infinite backwards;
+  }
+
+  .stroke-fixed .animate-rail-pulse {
+    vector-effect: none;
+  }
+
+  /* AI-first — the result catching it.
+
+     A band of ink laid across the diagonal of a tile three times the size of
+     the disc it is drawn on. At either end of the sweep the band is off the
+     disc entirely; dragging `background-position` corner to corner is what
+     pulls it across, and the disc's own `overflow-hidden` is what turns a
+     straight band into a glint on a circle. `to bottom right` because the
+     travel is diagonal too, so the band always crosses square to its path.
+
+     The sweep is the first 7% of the period and the rest is the wait — at the
+     default 13s, a shade under a second lit and twelve dark. Retime the period
+     in `skill-visuals.tsx` and the two stay in proportion.
+
+     0.55 is the ceiling on purpose: the star underneath has to stay readable
+     through it, or this stops being a glint passing over something and becomes
+     a lid closing over it. */
+  .animate-star-shine {
+    background-image: linear-gradient(
+      to bottom right,
+      transparent 44%,
+      var(--foreground) 50%,
+      transparent 56%
+    );
+    background-size: 300% 300%;
+    background-repeat: no-repeat;
+    animation: star-shine var(--pulse-period, 13s) linear infinite backwards;
+  }
+
   /* Rotating headline word — the drum. Each word enters from below the
      axle and leaves over the top, blurring as it turns away. */
   .animate-word-in {
@@ -192,6 +322,76 @@
   }
 }
 
+/* The chip's whole journey, in three legs.
+
+   It starts `--from-x/--from-y` outside where it belongs and comes in. It
+   holds at its own place — translate(0,0), which is where the layout already
+   put it — long enough to be read. Then it carries on to `--to-x/--to-y`,
+   which is the trip from that place to the centre, shrinking and fading the
+   whole way, so it ends up inside the portrait rather than switched off
+   beside it.
+
+   That third leg is the difference between eight things arriving near
+   somebody and eight things being taken in by them. */
+@keyframes converge {
+  0% {
+    opacity: 0;
+    transform: translate(var(--from-x), var(--from-y)) scale(0.92);
+  }
+  16% {
+    opacity: 1;
+  }
+  46%,
+  62% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  88% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--to-x), var(--to-y)) scale(0.35);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* One bead, from just off the near end of a rail to just past the far one.
+   Both ends are per element, which is the only reason four rails of different
+   lengths and two different speeds can share one block. */
+@keyframes rail-pulse {
+  from {
+    stroke-dashoffset: var(--bead-from);
+  }
+  to {
+    stroke-dashoffset: var(--bead-to);
+  }
+}
+
+/* The glint. Position carries the band across the disc; opacity is what keeps
+   the other 93% of the period dark, since the band has to be parked SOMEWHERE
+   and a tile that big has no truly empty corner to park it in. */
+@keyframes star-shine {
+  0% {
+    opacity: 0;
+    background-position: 0% 0%;
+  }
+  1%,
+  6% {
+    opacity: 0.55;
+  }
+  7%,
+  100% {
+    opacity: 0;
+    background-position: 100% 100%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -199,5 +399,32 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Has to sit after the blanket rule above, not before: both are `!important`
+     at the same specificity, so this only wins on source order.
+
+     Without it these two are worse off than if they had never animated. The
+     blanket rule does not stop an animation, it runs it in 0.01ms and leaves
+     the element on its last frame — which for a converging chip is invisible,
+     and for a marquee row is halfway through its own duplicate. Killing the
+     animation outright drops both back to their layout position, and their
+     layout position is a perfectly good still. */
+  .animate-converge,
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Same reasoning, opposite answer. These two have no still worth landing on:
+     the board they run over was a finished diagram before either of them
+     existed, and a bead frozen halfway down a rail is just a smudge on it. So
+     they are not there at all, and what is left is the diagram. */
+  .animate-rail-pulse,
+  .animate-star-shine {
+    animation: none !important;
+    opacity: 0;
   }
 }
