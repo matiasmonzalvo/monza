@@ -332,11 +332,15 @@ function tail(s: Scene) {
  *  finished bead that glows and not the slab it was cut from — inside, the mask
  *  would trim the glow off with the rest of the overhang.
  *
- *  Both filters sit on a group rather than on the beads, and that is not
- *  tidiness. The tail is a horizontal line, so its bounding box is a box with
- *  no height, and a filter given a region with no area has nowhere to work and
- *  is dropped — taking the bead with it. A group of all four rails has an
- *  honest box.
+ *  Each incoming rail has its own mask. The three paths share their final
+ *  point, so one mask containing all of them would let the blurred body of a
+ *  bead shine through its two neighbours for the instant it crosses that
+ *  junction. The outgoing rail gets a fourth mask for the same reason: a bead
+ *  is only ever allowed through the rail it actually belongs to.
+ *
+ *  The softening filter uses the board itself as its region. That matters for
+ *  the middle input and the tail: both are horizontal lines with a zero-height
+ *  bounding box, which gives an automatically-sized blur nowhere to render.
  * ────────────────────────────────────────────────────────────────
  */
 const PULSE = {
@@ -428,9 +432,10 @@ function AiScene({
 }: {
   layout: Scene;
   /**
-   * Names this scene's mask. Spelled out rather than generated because both
-   * scenes render into the same document and an SVG `url(#…)` is resolved
-   * document-wide — two masks under one name and one of them wins for both.
+   * Names this scene's masks and filter. Spelled out rather than generated
+   * because both scenes render into the same document and an SVG `url(#…)` is
+   * resolved document-wide — two definitions under one name and one of them
+   * wins for both.
    * `useId` would be the other answer, and it is a client hook.
    */
   id: string;
@@ -448,27 +453,59 @@ function AiScene({
         width={s.width}
         height={s.height}
       >
-        {/* What the light is allowed to be seen through. The rails again, at
-            the width a lit one should read, and the beads behind it are only
-            ever visible where this is — see the note on `PULSE`.
+        {/* What the light is allowed to be seen through. Each rail gets its own
+            mask so the blurred body of a bead cannot show through either of
+            the neighbouring inputs where the three paths meet.
 
             `#fff` is the one literal colour in the set, and it is not really a
             colour: inside a mask white means KEEP and black means DROP, so
             there is nothing here for the theme to flip. */}
         <defs>
-          <mask id={id}>
-            <g
+          {rows.map((y, row) => (
+            <mask
+              key={y}
+              id={`${id}-input-${row}`}
+              maskUnits="userSpaceOnUse"
+              x={0}
+              y={0}
+              width={s.width}
+              height={s.height}
+            >
+              <path
+                d={connector(s, y)}
+                stroke="#fff"
+                strokeWidth={PULSE.weight}
+                strokeLinecap="round"
+                fill="none"
+              />
+            </mask>
+          ))}
+          <mask
+            id={`${id}-output`}
+            maskUnits="userSpaceOnUse"
+            x={0}
+            y={0}
+            width={s.width}
+            height={s.height}
+          >
+            <path
+              d={tail(s)}
               stroke="#fff"
               strokeWidth={PULSE.weight}
               strokeLinecap="round"
               fill="none"
-            >
-              {rows.map((y) => (
-                <path key={y} d={connector(s, y)} />
-              ))}
-              <path d={tail(s)} />
-            </g>
+            />
           </mask>
+          <filter
+            id={`${id}-soften`}
+            filterUnits="userSpaceOnUse"
+            x={0}
+            y={0}
+            width={s.width}
+            height={s.height}
+          >
+            <feGaussianBlur stdDeviation={PULSE.soften} />
+          </filter>
         </defs>
 
         {/* Connectors, first so everything else lands on top of them. */}
@@ -486,18 +523,14 @@ function AiScene({
             end: the glow going INTO the portrait instead of over the top of it
             is what makes the arrival read as an arrival.
 
-            Two groups and not one. The inner one is blurred and then cut to
-            shape by the mask above; the outer one glows what comes out of it.
-            Both of those are explained on `PULSE`, and neither can move onto
-            the paths themselves. */}
+            Each path is softened and cut by its own mask before the outer
+            group adds the glow to the finished, isolated beads. */}
         <g
           style={{
             filter: `drop-shadow(0 0 ${PULSE.glow}px var(--foreground))`,
           }}
         >
           <g
-            mask={`url(#${id})`}
-            style={{ filter: `blur(${PULSE.soften}px)` }}
             className="stroke-foreground"
             fill="none"
             strokeWidth={PULSE.body}
@@ -508,24 +541,30 @@ function AiScene({
           >
             {PULSE.schedule.map((departure) => (
               <g key={`${departure.row}-${departure.at}`}>
-                <path
-                  className="animate-rail-pulse"
-                  pathLength={100}
-                  d={connector(s, rows[departure.row])}
-                  style={{
-                    ...bead(PULSE.travelIn),
-                    animationDelay: `${departure.at}s`,
-                  }}
-                />
-                <path
-                  className="animate-rail-pulse"
-                  pathLength={100}
-                  d={tail(s)}
-                  style={{
-                    ...bead(PULSE.travelOut),
-                    animationDelay: `${departure.at + PULSE.travelIn + PULSE.hold}s`,
-                  }}
-                />
+                <g mask={`url(#${id}-input-${departure.row})`}>
+                  <path
+                    className="animate-rail-pulse"
+                    pathLength={100}
+                    d={connector(s, rows[departure.row])}
+                    filter={`url(#${id}-soften)`}
+                    style={{
+                      ...bead(PULSE.travelIn),
+                      animationDelay: `${departure.at}s`,
+                    }}
+                  />
+                </g>
+                <g mask={`url(#${id}-output)`}>
+                  <path
+                    className="animate-rail-pulse"
+                    pathLength={100}
+                    d={tail(s)}
+                    filter={`url(#${id}-soften)`}
+                    style={{
+                      ...bead(PULSE.travelOut),
+                      animationDelay: `${departure.at + PULSE.travelIn + PULSE.hold}s`,
+                    }}
+                  />
+                </g>
               </g>
             ))}
           </g>
