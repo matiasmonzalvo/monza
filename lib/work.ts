@@ -87,7 +87,7 @@ export const WORK: WorkItem[] = [
     title: "Habitat Conecta",
     tag: "Web app",
     description:
-      "Split-screen entry point for a neighbourhood platform: the brand on one side, the shortest path to an account on the other.",
+      "Networking platform connecting entrepreneurs and businesses, supported by a feature-rich administrative dashboard.",
     image: habitat,
   },
   {

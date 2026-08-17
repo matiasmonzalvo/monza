@@ -23,8 +23,9 @@ import { WORK } from "@/lib/work";
  *  runs out.
  *
  *  Below `md`, and whenever reduced motion is asked for, none of that is
- *  created: the track is a plain snap-scrolling overflow container, which is
- *  also what a visitor with no JS gets.
+ *  created: the track is a native horizontal overflow container. Phones keep
+ *  it free-scrolling, while the reduced-motion desktop fallback keeps its
+ *  project snapping.
  *
  *  Sizing runs image-first. Every shot is given the same height (`--shot`) and
  *  the card takes whatever width that height and the image's own ratio come
@@ -282,7 +283,7 @@ export function Work() {
       {/* Full-bleed track. */}
       <div
         ref={viewportRef}
-        className="relative snap-x snap-mandatory overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:min-h-0 md:flex-1 [&::-webkit-scrollbar]:hidden"
+        className="relative overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:min-h-0 md:flex-1 md:snap-x md:snap-mandatory [&::-webkit-scrollbar]:hidden"
       >
         {/* The rail's own padding, so `track.offsetWidth` already carries both
             ends and the travel maths below needs no adjusting. `max()` holds
@@ -305,7 +306,7 @@ export function Work() {
                   "--ratio": String(item.image.width / item.image.height),
                 } as CSSProperties
               }
-              className="flex w-[calc(var(--shot)*var(--ratio))] shrink-0 snap-center flex-col relative"
+              className="relative flex w-[calc(var(--shot)*var(--ratio))] shrink-0 flex-col md:snap-center"
             >
               <div className="relative">
                 {/* <div className="absolute w-full h-[50%] bg-linear-to-b from-transparent via-background/10 to-background z-50 bottom-0 left-0"></div> */}

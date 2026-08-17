@@ -4,6 +4,28 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import { useTheme } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
+type PortraitProfile = {
+  /** Backing-store density. Mobile panels commonly need the third pixel. */
+  maxDpr: number;
+  art: { scale: number; offsetX: number; offsetY: number };
+  sampling: {
+    step: number;
+    alpha: number;
+    ink: number;
+    jitter: number;
+    max: number;
+  };
+  dot: { min: number; max: number };
+  drift: { amount: number; speed: number };
+  pointer: {
+    radius: number;
+    strength: number;
+    ease: number;
+    variance: number;
+  };
+  settle: { duration: number; stagger: number; spread: number };
+};
+
 /**
  * The drawing, rebuilt as a field of slowly drifting dots.
  *
@@ -13,12 +35,13 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
  * reads as a still image that is quietly breathing. The cursor pushes the ones
  * it passes over out of the way, and they drift back once it moves on.
  *
- * Everything worth nudging lives in CONFIG. Nothing below it needs to be
- * touched to retune the effect.
+ * Everything worth nudging lives in CONFIG. Mobile has its own canvas inputs
+ * so a small portrait does not inherit desktop's looser sampling and motion.
  */
 const CONFIG = {
   /** Source art. Dark ink on a light — or transparent — ground is what samples well. */
   src: "/hero-illustration.png",
+  maxDpr: 2,
 
   /**
    * Where the canvas sits. It is not an overlay: it is the last item in the
@@ -153,7 +176,37 @@ const CONFIG = {
     /** How far from home the dots begin, in px. */
     spread: 120,
   },
+
+  /**
+   * Inputs used below Tailwind's `lg` breakpoint. They are intentionally
+   * denser and steadier so the facial strokes survive at phone sizes.
+   */
+  mobile: {
+    maxDpr: 3,
+    art: { scale: 1, offsetX: 0, offsetY: 0 },
+    sampling: {
+      step: 2,
+      alpha: 28,
+      ink: 165,
+      jitter: 0.08,
+      max: 24000,
+    },
+    dot: { min: 0.8, max: 1.15 },
+    drift: { amount: 1.15, speed: 0.8 },
+    pointer: { radius: 90, strength: 14, ease: 7, variance: 0.2 },
+    settle: { duration: 1, stagger: 0.35, spread: 70 },
+  } satisfies PortraitProfile,
 };
+
+const DESKTOP_PROFILE = {
+  maxDpr: CONFIG.maxDpr,
+  art: CONFIG.art,
+  sampling: CONFIG.sampling,
+  dot: CONFIG.dot,
+  drift: CONFIG.drift,
+  pointer: CONFIG.pointer,
+  settle: CONFIG.settle,
+} satisfies PortraitProfile;
 
 const TAU = Math.PI * 2;
 
@@ -185,7 +238,12 @@ type Dot = {
  * Reads the art at the size it will be painted, so dot spacing stays constant
  * no matter how large the canvas gets.
  */
-function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
+function sample(
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+  profile: PortraitProfile,
+): Dot[] {
   const buffer = document.createElement("canvas");
   buffer.width = width;
   buffer.height = height;
@@ -194,23 +252,23 @@ function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
   if (!bctx) return [];
 
   const fit =
-    Math.min(width / image.width, height / image.height) * CONFIG.art.scale;
+    Math.min(width / image.width, height / image.height) * profile.art.scale;
   const dw = image.width * fit;
   const dh = image.height * fit;
   bctx.drawImage(
     image,
-    (width - dw) / 2 + CONFIG.art.offsetX * width,
-    (height - dh) / 2 + CONFIG.art.offsetY * height,
+    (width - dw) / 2 + profile.art.offsetX * width,
+    (height - dh) / 2 + profile.art.offsetY * height,
     dw,
     dh,
   );
 
   const { data } = bctx.getImageData(0, 0, width, height);
-  const { step, ink, alpha, jitter } = CONFIG.sampling;
-  const { min, max } = CONFIG.dot;
-  const { amount, speed } = CONFIG.drift;
-  const { spread } = CONFIG.settle;
-  const { variance } = CONFIG.pointer;
+  const { step, ink, alpha, jitter } = profile.sampling;
+  const { min, max } = profile.dot;
+  const { amount, speed } = profile.drift;
+  const { spread } = profile.settle;
+  const { variance } = profile.pointer;
   const dots: Dot[] = [];
 
   for (let y = step / 2; y < height; y += step) {
@@ -247,10 +305,10 @@ function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
     }
   }
 
-  if (dots.length <= CONFIG.sampling.max) return dots;
+  if (dots.length <= profile.sampling.max) return dots;
 
   // Denser than the budget: keep an even spread of what was found.
-  const stride = dots.length / CONFIG.sampling.max;
+  const stride = dots.length / profile.sampling.max;
   const thinned: Dot[] = [];
   for (let i = 0; i < dots.length; i += stride) {
     thinned.push(dots[Math.floor(i)]);
@@ -278,9 +336,14 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
     if (!ctx) return;
 
     const image = new Image();
+    const desktopMedia = window.matchMedia("(min-width: 64rem)");
+    let profile: PortraitProfile = desktopMedia.matches
+      ? DESKTOP_PROFILE
+      : CONFIG.mobile;
     let dots: Dot[] = [];
     let width = 0;
     let height = 0;
+    let pixelRatio = 0;
     let raf = 0;
     let clock = 0;
     let last = 0;
@@ -302,11 +365,12 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
       const rect = canvas.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width));
       const h = Math.max(1, Math.round(rect.height));
-      if (w === width && h === height) return false;
+      const dpr = Math.min(window.devicePixelRatio || 1, profile.maxDpr);
+      if (w === width && h === height && dpr === pixelRatio) return false;
 
       width = w;
       height = h;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      pixelRatio = dpr;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -318,8 +382,8 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
       if (dots.length === 0) return;
 
       const { color, opacity } = paletteRef.current;
-      const { duration, stagger } = CONFIG.settle;
-      const { radius, strength, ease } = CONFIG.pointer;
+      const { duration, stagger } = profile.settle;
+      const { radius, strength, ease } = profile.pointer;
       const wander = stillRef.current ? 0 : 1;
       const t = clock;
 
@@ -387,7 +451,7 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
       last = now;
 
       if (stillRef.current) {
-        clock = CONFIG.settle.duration;
+        clock = profile.settle.duration;
       } else {
         clock += delta;
       }
@@ -416,7 +480,7 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
 
     const build = () => {
       if (!ready || width === 0) return;
-      dots = sample(image, width, height);
+      dots = sample(image, width, height, profile);
     };
 
     const start = () => {
@@ -433,6 +497,14 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
     };
 
     repaintRef.current = kick;
+
+    const onProfileChange = () => {
+      profile = desktopMedia.matches ? DESKTOP_PROFILE : CONFIG.mobile;
+      measure();
+      build();
+      kick();
+    };
+    desktopMedia.addEventListener("change", onProfileChange);
 
     const ro = new ResizeObserver(() => {
       if (!measure()) return;
@@ -486,6 +558,7 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
       pause();
       ro.disconnect();
       io.disconnect();
+      desktopMedia.removeEventListener("change", onProfileChange);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerleave", onPointerGone);

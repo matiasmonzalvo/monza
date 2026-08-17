@@ -33,11 +33,11 @@ export function Hero() {
         {/* `lg:pb-12` rather than the 0 it used to be: on a tall screen this
             block ends where the rule below it starts, so it needs air of its
             own to sit on. It costs the portrait 48px of leftover. */}
-        <div className="relative z-10 px-6 py-24 text-center sm:px-8 sm:py-32 lg:pt-32 lg:pb-20 bg-surface">
+        <div className="relative z-10 px-6 pt-24 pb-14 text-center sm:px-8 sm:py-32 lg:pt-32 lg:pb-20 bg-surface">
           <p className="mb-4 text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg">
             I'm Monza
           </p>
-          <h1 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-[4vw]">
+          <h1 className="text-6xl text-center font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-[4vw]">
             Product <RotatingWord />
           </h1>
 
