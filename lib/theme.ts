@@ -27,8 +27,17 @@ function readStored(): Theme | null {
 }
 
 function apply(theme: Theme) {
-  document.documentElement.classList.toggle("dark", theme === "dark");
-  document.documentElement.style.colorScheme = theme;
+  const root = document.documentElement;
+  const themeColor = theme === "dark" ? "#000000" : "#ffffff";
+
+  root.classList.toggle("dark", theme === "dark");
+  root.style.colorScheme = theme;
+  document
+    .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    ?.setAttribute("content", themeColor);
+  document
+    .querySelector<HTMLMetaElement>('meta[name="color-scheme"]')
+    ?.setAttribute("content", theme);
   emit();
 }
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import { LandingNavbar } from "@/components/layout/landing-navbar";
@@ -17,21 +17,41 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Provides a server-rendered fallback for mobile browser chrome. The blocking
+ * theme script replaces these values before first paint when the visitor uses
+ * the light theme or follows a light system preference.
+ */
+export const viewport: Viewport = {
+  themeColor: "#000000",
+  colorScheme: "dark",
+};
+
+/**
  * Runs before first paint so the stored theme is applied without a flash.
  * Kept as a plain string: it must not depend on the React bundle.
  */
 const themeScript = `
 (function () {
+  function applyTheme(theme) {
+    var root = document.documentElement;
+    var themeColor = theme === 'dark' ? '#000000' : '#ffffff';
+    var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    var colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+
+    root.classList.toggle('dark', theme === 'dark');
+    root.style.colorScheme = theme;
+    if (themeColorMeta) themeColorMeta.setAttribute('content', themeColor);
+    if (colorSchemeMeta) colorSchemeMeta.setAttribute('content', theme);
+  }
+
   try {
     var stored = localStorage.getItem('theme');
     var theme = stored === 'light' || stored === 'dark'
       ? stored
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    if (theme === 'dark') document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = theme;
+    applyTheme(theme);
   } catch (e) {
-    document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = 'dark';
+    applyTheme('dark');
   }
 })();
 `;
