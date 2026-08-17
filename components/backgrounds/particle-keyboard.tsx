@@ -1,8 +1,28 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { useTheme } from "@/lib/theme";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
+
+type KeyboardProfile = {
+  maxDpr: number;
+  art: { scale: number; offsetX: number; offsetY: number };
+  sampling: {
+    step: number;
+    alpha: number;
+    jitter: number;
+    max: number;
+  };
+  dot: { min: number; max: number };
+  drift: { amount: number; speed: number };
+  pointer: {
+    radius: number;
+    strength: number;
+    ease: number;
+    variance: number;
+  };
+  settle: { duration: number; stagger: number; spread: number };
+};
 
 /**
  * The keyboard, rebuilt as a field of slowly drifting dots.
@@ -12,14 +32,8 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
  * gate becomes a particle that wanders a few px around the spot it came from,
  * with the cursor pushing aside the ones it passes over.
  *
- * What is different is how a sample is judged. The portrait is ink on nothing,
- * so a pixel is either part of the drawing or it is not. This is a photograph:
- * ~85% of it is opaque, and taking all of it would paint a solid slab. So the
- * dots are sized by tone instead — the lit edges and legends of the keycaps
- * get the fat ones, the black case falls away to nothing — and the keyboard
- * comes out as a line drawing of itself, every cap outlined and every legend
- * readable. That is one pair of numbers in `tone`, and swapping them reads the
- * art by its ink instead.
+ * The current PNG is already a white drawing on transparency, so alpha is the
+ * only gate: no luminance pass, gamma curve or cell averaging is needed.
  *
  * Legibility at that scale is a three-number balance, and it is the thing to
  * hold on to when retuning: `sampling.step` sets how fine the grid is, `dot`
@@ -32,6 +46,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 const CONFIG = {
   /** Source art. Anything cut out against a transparent ground samples cleanly. */
   src: "/keyboard.png",
+  maxDpr: 1.75,
 
   /**
    * Where the canvas sits. Unlike the hero's — which fills whatever height the
@@ -48,6 +63,8 @@ const CONFIG = {
      * 1200px frame's own padding starts clipping it.
      */
     width: "min(80%, 1100px)",
+    /** Slightly wider on phones so the reduced keyboard keeps its detail. */
+    widthMobile: "min(90%, 1100px)",
     /**
      * Air above and below the drawing, and the same on both sides on purpose:
      * this is what centres it in its band. A viewport-relative middle value so
@@ -95,62 +112,25 @@ const CONFIG = {
      * check it against `max`.
      */
     step: 3.5,
-    /**
-     * Reads the mean of the whole cell instead of the one pixel under the
-     * sample point. Costs a pass over every pixel once per resize, and buys
-     * the detail that makes this legible: a stroke thinner than `step` still
-     * registers, as a dimmer and smaller dot rather than as nothing at all.
-     * Point sampling instead comes out fractionally crisper, at the price of
-     * dropping thin rims wherever the grid happens to fall between them.
-     */
-    average: true,
     /** 0-255. Skips the transparent ground the keyboard was cut out of. */
-    alpha: 40,
+    alpha: 24,
     /**
      * Share of a step the samples are knocked off the grid by. Keeps it from
      * looking machine-ruled. At this step it is a fifth of a pixel, so it is
      * doing very little; it earns its keep again if you go back to a coarse
      * grid, and past ~0.3 there it starts eating the gaps between the caps.
      */
-    jitter: 0.2,
-    /**
-     * Perf ceiling, and the trap when you lower `step`: the field is thinned
-     * to an even spread of this many the moment it is exceeded, which quietly
-     * undoes the detail you just asked for. The current settings land near
-     * 24k on a full-width canvas, so this is roughly a 60% margin.
-     */
-    max: 40000,
+    jitter: 0.1,
+    /** Hard desktop ceiling; the old 40k budget was the main frame-time risk. */
+    max: 10000,
   },
 
   /**
-   * How brightness picks a dot size. `from` is the luminance (0-255) that
-   * draws the smallest dot, `to` the one that draws the largest, and
-   * everything between is a ramp across `dot` below.
-   *
-   * With `to` above `from` — the case here — the art is read by its highlights:
-   * the lit keycaps survive and the black chassis drops out under `cut`. Put
-   * `to` *below* `from` and it reads by its ink instead, which is what a line
-   * drawing on white wants. Lowering `from` brings the chassis back as haze.
+   * Dot radius in CSS px. The source is now a binary transparent mask, so the
+   * small random range only keeps the field organic; brightness no longer
+   * affects particle size.
    */
-  tone: {
-    from: 75,
-    to: 195,
-    /** Bends the ramp. >1 holds the mid-tones back, <1 brings them forward. */
-    gamma: 1.1,
-    /** Weight below which a sample is dropped rather than drawn tiny. 0 keeps everything. */
-    cut: 0.08,
-  },
-
-  /**
-   * Dot radius in CSS px, handed out by `tone` rather than at random. The rule
-   * that matters is `max` against `step`: a dot is 2·max wide, so at 1 against
-   * step 2 the brightest dots just touch their neighbours and a letter stroke
-   * stays a stroke. Push `max` past half the step and the strokes fatten into
-   * each other — that is what turns "keyboard" back into "grey slab". The 0.25
-   * floor is a barely-there speck, which is what keeps the dim keys present
-   * instead of blinking out.
-   */
-  dot: { min: 0.25, max: 2 },
+  dot: { min: 0.85, max: 1.35 },
 
   /** One entry per theme, same shape as the portrait's palette. */
   palette: {
@@ -206,7 +186,28 @@ const CONFIG = {
     /** How far from home the dots begin, in px. */
     spread: 140,
   },
+
+  /** Tighter budget and finer samples for the smaller mobile canvas. */
+  mobile: {
+    maxDpr: 1.5,
+    art: { scale: 1, offsetX: 0, offsetY: 0 },
+    sampling: { step: 1.5, alpha: 12, jitter: 0.04, max: 6000 },
+    dot: { min: 0.55, max: 0.9 },
+    drift: { amount: 0.4, speed: 0.8 },
+    pointer: { radius: 70, strength: 10, ease: 7, variance: 0.15 },
+    settle: { duration: 0.9, stagger: 0.3, spread: 55 },
+  } satisfies KeyboardProfile,
 };
+
+const DESKTOP_PROFILE = {
+  maxDpr: CONFIG.maxDpr,
+  art: CONFIG.art,
+  sampling: CONFIG.sampling,
+  dot: CONFIG.dot,
+  drift: CONFIG.drift,
+  pointer: CONFIG.pointer,
+  settle: CONFIG.settle,
+} satisfies KeyboardProfile;
 
 const TAU = Math.PI * 2;
 
@@ -245,6 +246,7 @@ function sample(
   width: number,
   height: number,
   orientation: KeyboardOrientation,
+  profile: KeyboardProfile,
 ): Dot[] {
   const buffer = document.createElement("canvas");
   buffer.width = width;
@@ -256,15 +258,16 @@ function sample(
   const vertical = orientation === "vertical";
   const artWidth = vertical ? image.height : image.width;
   const artHeight = vertical ? image.width : image.height;
-  const fit = Math.min(width / artWidth, height / artHeight) * CONFIG.art.scale;
+  const fit =
+    Math.min(width / artWidth, height / artHeight) * profile.art.scale;
   const dw = image.width * fit;
   const dh = image.height * fit;
 
   if (vertical) {
     bctx.save();
     bctx.translate(
-      width / 2 + CONFIG.art.offsetX * width,
-      height / 2 + CONFIG.art.offsetY * height,
+      width / 2 + profile.art.offsetX * width,
+      height / 2 + profile.art.offsetY * height,
     );
     bctx.rotate(-Math.PI / 2);
     bctx.drawImage(image, -dw / 2, -dh / 2, dw, dh);
@@ -272,71 +275,25 @@ function sample(
   } else {
     bctx.drawImage(
       image,
-      (width - dw) / 2 + CONFIG.art.offsetX * width,
-      (height - dh) / 2 + CONFIG.art.offsetY * height,
+      (width - dw) / 2 + profile.art.offsetX * width,
+      (height - dh) / 2 + profile.art.offsetY * height,
       dw,
       dh,
     );
   }
 
   const { data } = bctx.getImageData(0, 0, width, height);
-  const { step, average, alpha, jitter } = CONFIG.sampling;
-  const { from, to, gamma, cut } = CONFIG.tone;
-  const { min, max } = CONFIG.dot;
-  const { amount, speed } = CONFIG.drift;
-  const { spread } = CONFIG.settle;
-  const { variance } = CONFIG.pointer;
+  const { step, alpha, jitter } = profile.sampling;
+  const { min, max } = profile.dot;
+  const { amount, speed } = profile.drift;
+  const { spread } = profile.settle;
+  const { variance } = profile.pointer;
   const dots: Dot[] = [];
-
-  // Guarded so a `tone` with both ends on the same value degrades to a flat
-  // field of the largest dot rather than dividing by zero.
-  const span = to - from || 1;
-
-  // Half a cell, rounded to whole pixels and never less than one, so that even
-  // the finest grid still averages a 3×3 box rather than falling back to a
-  // single pixel and defeating the point.
-  const pad = average ? Math.max(1, Math.round(step / 2)) : 0;
 
   for (let y = step / 2; y < height; y += step) {
     for (let x = step / 2; x < width; x += step) {
-      const cellX = Math.floor(x);
-      const cellY = Math.floor(y);
-
-      let sampleAlpha: number;
-      let sampleLum: number;
-
-      if (pad === 0) {
-        const i = (cellY * width + cellX) * 4;
-        sampleAlpha = data[i + 3];
-        sampleLum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      } else {
-        const top = cellY - pad < 0 ? 0 : cellY - pad;
-        const bottom = cellY + pad > height - 1 ? height - 1 : cellY + pad;
-        const left = cellX - pad < 0 ? 0 : cellX - pad;
-        const right = cellX + pad > width - 1 ? width - 1 : cellX + pad;
-
-        let sumAlpha = 0;
-        let sumLum = 0;
-        for (let iy = top; iy <= bottom; iy++) {
-          const row = iy * width;
-          for (let ix = left; ix <= right; ix++) {
-            const i = (row + ix) * 4;
-            sumAlpha += data[i + 3];
-            sumLum +=
-              0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          }
-        }
-        const taken = (bottom - top + 1) * (right - left + 1);
-        sampleAlpha = sumAlpha / taken;
-        sampleLum = sumLum / taken;
-      }
-
-      if (sampleAlpha < alpha) continue;
-
-      const level = (sampleLum - from) / span;
-      const clamped = level < 0 ? 0 : level > 1 ? 1 : level;
-      const weight = gamma === 1 ? clamped : clamped ** gamma;
-      if (weight < cut) continue;
+      const i = (Math.floor(y) * width + Math.floor(x)) * 4;
+      if (data[i + 3] < alpha) continue;
 
       const hx = x + (Math.random() - 0.5) * step * jitter;
       const hy = y + (Math.random() - 0.5) * step * jitter;
@@ -348,7 +305,7 @@ function sample(
         hy,
         sx: hx + Math.cos(angle) * distance,
         sy: hy + Math.sin(angle) * distance,
-        r: min + weight * (max - min),
+        r: min + Math.random() * (max - min),
         delay: Math.random(),
         ax: amount * (0.4 + Math.random() * 0.6),
         ay: amount * (0.4 + Math.random() * 0.6),
@@ -363,10 +320,10 @@ function sample(
     }
   }
 
-  if (dots.length <= CONFIG.sampling.max) return dots;
+  if (dots.length <= profile.sampling.max) return dots;
 
   // Denser than the budget: keep an even spread of what was found.
-  const stride = dots.length / CONFIG.sampling.max;
+  const stride = dots.length / profile.sampling.max;
   const thinned: Dot[] = [];
   for (let i = 0; i < dots.length; i += stride) {
     thinned.push(dots[Math.floor(i)]);
@@ -400,9 +357,15 @@ export function ParticleKeyboard({
     if (!ctx) return;
 
     const image = new Image();
+    const desktopMedia = window.matchMedia("(min-width: 48rem)");
+    let profile =
+      orientation === "vertical" || !desktopMedia.matches
+        ? CONFIG.mobile
+        : DESKTOP_PROFILE;
     let dots: Dot[] = [];
     let width = 0;
     let height = 0;
+    let pixelRatio = 0;
     let raf = 0;
     let clock = 0;
     let last = 0;
@@ -424,11 +387,12 @@ export function ParticleKeyboard({
       const rect = canvas.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width));
       const h = Math.max(1, Math.round(rect.height));
-      if (w === width && h === height) return false;
+      const dpr = Math.min(window.devicePixelRatio || 1, profile.maxDpr);
+      if (w === width && h === height && dpr === pixelRatio) return false;
 
       width = w;
       height = h;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      pixelRatio = dpr;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -440,8 +404,8 @@ export function ParticleKeyboard({
       if (dots.length === 0) return;
 
       const { color, opacity } = paletteRef.current;
-      const { duration, stagger } = CONFIG.settle;
-      const { radius, strength, ease } = CONFIG.pointer;
+      const { duration, stagger } = profile.settle;
+      const { radius, strength, ease } = profile.pointer;
       const wander = stillRef.current ? 0 : 1;
       const t = clock;
 
@@ -509,7 +473,7 @@ export function ParticleKeyboard({
       last = now;
 
       if (stillRef.current) {
-        clock = CONFIG.settle.duration;
+        clock = profile.settle.duration;
       } else {
         clock += delta;
       }
@@ -538,7 +502,7 @@ export function ParticleKeyboard({
 
     const build = () => {
       if (!ready || width === 0) return;
-      dots = sample(image, width, height, orientation);
+      dots = sample(image, width, height, orientation, profile);
     };
 
     const start = () => {
@@ -562,12 +526,23 @@ export function ParticleKeyboard({
 
     repaintRef.current = kick;
 
+    const onProfileChange = () => {
+      profile =
+        orientation === "vertical" || !desktopMedia.matches
+          ? CONFIG.mobile
+          : DESKTOP_PROFILE;
+      measure();
+      build();
+      kick();
+    };
+    desktopMedia.addEventListener("change", onProfileChange);
+
     const ro = new ResizeObserver(() => {
       if (!measure()) return;
       build();
       kick();
     });
-    ro.observe(canvas);
+    ro.observe(wrap);
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -614,6 +589,7 @@ export function ParticleKeyboard({
       pause();
       ro.disconnect();
       io.disconnect();
+      desktopMedia.removeEventListener("change", onProfileChange);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerleave", onPointerGone);
@@ -642,13 +618,21 @@ export function ParticleKeyboard({
         paddingBlock: vertical ? 0 : CONFIG.layout.padY,
         maskImage: vertical ? "none" : fade,
         WebkitMaskImage: vertical ? "none" : fade,
-      }}
+        "--keyboard-width-desktop": CONFIG.layout.width,
+        "--keyboard-width-mobile": CONFIG.layout.widthMobile,
+      } as CSSProperties}
     >
       <canvas
         ref={canvasRef}
+        className={
+          vertical
+            ? "h-full w-full"
+            : "w-[var(--keyboard-width-mobile)] md:w-[var(--keyboard-width-desktop)]"
+        }
         style={{
           display: "block",
-          width: vertical ? "100%" : CONFIG.layout.width,
+          position: vertical ? "absolute" : "static",
+          inset: vertical ? 0 : undefined,
           height: vertical ? "100%" : "auto",
           marginInline: "auto",
           // Placeholder until the art loads and replaces it with its own ratio.
