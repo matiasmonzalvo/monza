@@ -1,5 +1,6 @@
 import { Frame, Section } from "@/components/layout/grid";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { About } from "@/components/sections/about";
 import { ComponentLibrary } from "@/components/sections/component-library";
 import { Contact } from "@/components/sections/contact";
 import { Formation } from "@/components/sections/formation";
@@ -12,11 +13,13 @@ export default function Home() {
   return (
     <>
       <main className="flex-1">
-        {/* Outside the frame for the same reason as `Work`: the curve that
-            closes the hero runs to the screen edge. It brings the column back
-            around the facts row, which is where its rails land. */}
+        {/* Hero and About share the same rails so the portrait, animated copy,
+            keyboard and facts read as one continuous opening sequence. */}
         <Frame>
           <Hero />
+          <Section id="about">
+            <About />
+          </Section>
         </Frame>
         {/* Deliberately outside the frame: its rail has to run edge to edge,
             which it cannot do from inside a 1200px column. The heading in

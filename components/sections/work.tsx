@@ -33,9 +33,6 @@ import { WORK } from "@/lib/work";
  * ────────────────────────────────────────────────────────────────
  */
 
-/** The page column, straight off `<Frame>`. Has to stay in step with it. */
-const COLUMN = 1200;
-
 /**
  * ────────────────────────────────────────────────────────────────
  *  HOW BIG THE CARDS ARE — the only thing here worth turning.
@@ -108,15 +105,17 @@ const fluid = (min: number, svh: number, max: number) =>
 
 export function Work() {
   const sectionRef = useRef<HTMLElement>(null);
+  const columnRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   useIsomorphicLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const section = sectionRef.current;
+    const column = columnRef.current;
     const viewport = viewportRef.current;
     const track = trackRef.current;
-    if (!section || !viewport || !track) return;
+    if (!section || !column || !viewport || !track) return;
 
     /** Publishes the lengths the rail lays itself out from. Pure reads. */
     const measure = () => {
@@ -125,10 +124,15 @@ export function Work() {
       // scrollbar of drift against a 1px rule reads as a mistake, not a choice.
       const screen = document.documentElement.clientWidth;
 
-      // `--rail`: the gap between the screen edge and the page column, so the
-      // first card starts and the last one ends on the same line the rest of
-      // the page is built on.
-      section.style.setProperty("--rail", `${(screen - COLUMN) / 2}px`);
+      // `--rail`: the gap between the screen edge and the actual page column,
+      // so the first card starts and the last one ends exactly on its rails.
+      // Measuring the `max-w-6xl` element keeps the two in step without
+      // duplicating Tailwind's container width here as a magic number.
+      const columnWidth = column.getBoundingClientRect().width;
+      section.style.setProperty(
+        "--rail",
+        `${Math.max(0, (screen - columnWidth) / 2)}px`,
+      );
 
       // `--shot-sm`: the mobile height, worked back from how much of the
       // screen a card should cover.
@@ -257,7 +261,10 @@ export function Work() {
       className="relative -mt-px flex w-full flex-col border-b border-border [--shot:var(--shot-sm,50vw)] md:h-svh md:[--shot:var(--shot-md,58svh)]"
     >
       {/* Heading — the last thing here that obeys the page column. */}
-      <div className="mx-auto w-full max-w-6xl border-x border-border">
+      <div
+        ref={columnRef}
+        className="mx-auto w-full max-w-6xl border-x border-border"
+      >
         {/* The literals are the heading as it has always looked, and all a
             phone ever sees: below `md` the section is not one viewport tall, so
             a long heading only pushes the rail down the page instead of

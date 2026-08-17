@@ -47,13 +47,13 @@ const CONFIG = {
      * legends out of more pixels. 1100 is about as far as it goes before the
      * 1200px frame's own padding starts clipping it.
      */
-    width: "min(100%, 1100px)",
+    width: "min(80%, 1100px)",
     /**
      * Air above and below the drawing, and the same on both sides on purpose:
      * this is what centres it in its band. A viewport-relative middle value so
      * it opens up on a wide screen without needing a breakpoint of its own.
      */
-    padY: "clamp(3rem, 5vw, 5rem)",
+    padY: "clamp(3rem, 2vw, 5rem)",
     /** Nudge off dead centre. "-40px" slides the keyboard left. */
     shift: "0px",
     /**
@@ -94,7 +94,7 @@ const CONFIG = {
      * still works — 1.5 is crisper — but the count goes up with the square, so
      * check it against `max`.
      */
-    step: 4,
+    step: 3.5,
     /**
      * Reads the mean of the whole cell instead of the one pixel under the
      * sample point. Costs a pass over every pixel once per resize, and buys
@@ -234,11 +234,18 @@ type Dot = {
   oy: number;
 };
 
+type KeyboardOrientation = "horizontal" | "vertical";
+
 /**
  * Reads the art at the size it will be painted, so dot spacing stays constant
  * no matter how large the canvas gets.
  */
-function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
+function sample(
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+  orientation: KeyboardOrientation,
+): Dot[] {
   const buffer = document.createElement("canvas");
   buffer.width = width;
   buffer.height = height;
@@ -246,17 +253,31 @@ function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
   const bctx = buffer.getContext("2d", { willReadFrequently: true });
   if (!bctx) return [];
 
-  const fit =
-    Math.min(width / image.width, height / image.height) * CONFIG.art.scale;
+  const vertical = orientation === "vertical";
+  const artWidth = vertical ? image.height : image.width;
+  const artHeight = vertical ? image.width : image.height;
+  const fit = Math.min(width / artWidth, height / artHeight) * CONFIG.art.scale;
   const dw = image.width * fit;
   const dh = image.height * fit;
-  bctx.drawImage(
-    image,
-    (width - dw) / 2 + CONFIG.art.offsetX * width,
-    (height - dh) / 2 + CONFIG.art.offsetY * height,
-    dw,
-    dh,
-  );
+
+  if (vertical) {
+    bctx.save();
+    bctx.translate(
+      width / 2 + CONFIG.art.offsetX * width,
+      height / 2 + CONFIG.art.offsetY * height,
+    );
+    bctx.rotate(-Math.PI / 2);
+    bctx.drawImage(image, -dw / 2, -dh / 2, dw, dh);
+    bctx.restore();
+  } else {
+    bctx.drawImage(
+      image,
+      (width - dw) / 2 + CONFIG.art.offsetX * width,
+      (height - dh) / 2 + CONFIG.art.offsetY * height,
+      dw,
+      dh,
+    );
+  }
 
   const { data } = bctx.getImageData(0, 0, width, height);
   const { step, average, alpha, jitter } = CONFIG.sampling;
@@ -353,7 +374,13 @@ function sample(image: HTMLImageElement, width: number, height: number): Dot[] {
   return thinned;
 }
 
-export function ParticleKeyboard({ className = "" }: { className?: string }) {
+export function ParticleKeyboard({
+  className = "",
+  orientation = "horizontal",
+}: {
+  className?: string;
+  orientation?: KeyboardOrientation;
+}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
@@ -511,7 +538,7 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
 
     const build = () => {
       if (!ready || width === 0) return;
-      dots = sample(image, width, height);
+      dots = sample(image, width, height, orientation);
     };
 
     const start = () => {
@@ -519,8 +546,14 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
       ready = true;
       // The box takes the art's own ratio, so swapping the photo for a
       // different crop cannot letterbox it inside a shape it does not fill.
-      if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+      if (
+        orientation === "horizontal" &&
+        image.naturalWidth > 0 &&
+        image.naturalHeight > 0
+      ) {
         canvas.style.aspectRatio = `${image.naturalWidth} / ${image.naturalHeight}`;
+      } else {
+        canvas.style.aspectRatio = "auto";
       }
       measure();
       build();
@@ -587,7 +620,7 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
       image.removeEventListener("load", start);
       repaintRef.current = () => {};
     };
-  }, []);
+  }, [orientation]);
 
   // A theme flip only changes what the next frame is painted with — and with
   // motion off there is no next frame, so ask for one.
@@ -597,6 +630,7 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
     repaintRef.current();
   }, [theme, reducedMotion]);
 
+  const vertical = orientation === "vertical";
   const fade = `linear-gradient(to bottom, #000 ${CONFIG.layout.fadeFrom}, transparent 100%)`;
 
   return (
@@ -605,20 +639,23 @@ export function ParticleKeyboard({ className = "" }: { className?: string }) {
       aria-hidden="true"
       className={`pointer-events-none relative w-full overflow-hidden ${className}`.trim()}
       style={{
-        paddingBlock: CONFIG.layout.padY,
-        maskImage: fade,
-        WebkitMaskImage: fade,
+        paddingBlock: vertical ? 0 : CONFIG.layout.padY,
+        maskImage: vertical ? "none" : fade,
+        WebkitMaskImage: vertical ? "none" : fade,
       }}
     >
       <canvas
         ref={canvasRef}
         style={{
           display: "block",
-          width: CONFIG.layout.width,
+          width: vertical ? "100%" : CONFIG.layout.width,
+          height: vertical ? "100%" : "auto",
           marginInline: "auto",
           // Placeholder until the art loads and replaces it with its own ratio.
-          aspectRatio: CONFIG.layout.ratio,
-          transform: `translateX(${CONFIG.layout.shift})`,
+          aspectRatio: vertical ? "auto" : CONFIG.layout.ratio,
+          transform: vertical
+            ? undefined
+            : `translateX(${CONFIG.layout.shift})`,
         }}
       />
     </div>

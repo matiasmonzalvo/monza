@@ -1,5 +1,4 @@
 import { ArrowRight } from "reicon-react";
-import { ParticleKeyboard } from "@/components/backgrounds/particle-keyboard";
 import { GmailIcon, LinkedInIcon, XIcon } from "@/components/icons/brand";
 import { Cell, CellGrid } from "@/components/layout/grid";
 
@@ -20,9 +19,8 @@ const CHANNELS = [
 export function Contact() {
   return (
     <CellGrid className="grid-cols-1">
-      {/* The cell carries no padding of its own so the rule between the copy
-          and the dots can run rail to rail, like every other rule on the page.
-          The padding lives on the two blocks instead. */}
+      {/* The cell carries no padding of its own so the rule below the copy can
+          run rail to rail, like every other rule on the page. */}
       <Cell className="w-full overflow-hidden">
         <div className="flex flex-col items-center justify-center px-6 py-12 sm:px-8 sm:py-14">
           <h2 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl ">
@@ -38,11 +36,6 @@ export function Contact() {
             Start a conversation
           </a>
         </div>
-
-        {/* Draws the rule itself, the way a `Cell` does. The air between that
-            rule and the drawing is `layout.padY` inside the component, which
-            puts the same amount underneath — that is what centres it. */}
-        <ParticleKeyboard className="border-t border-border" />
       </Cell>
 
       <Cell className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-border">
