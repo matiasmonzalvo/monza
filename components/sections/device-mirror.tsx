@@ -72,10 +72,10 @@ const MAC = {
 };
 
 const PHONE = {
-  width: 214,
+  width: 164,
   /** The band around the glass. */
   bezel: 9,
-  radius: 30,
+  radius: 24,
   /** iPhone-ish. The frame is scaled from this, so the mirror is the real
       mobile layout rather than the desktop one made small. */
   viewport: { width: 390, height: 844 },
@@ -387,7 +387,7 @@ function IPhone({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{ padding: PHONE.bezel, borderRadius: PHONE.radius }}
-      className="relative border border-border-strong bg-black shadow-sm"
+      className="relative border border-border-strong bg-background shadow-sm"
     >
       <div
         style={{ borderRadius: Math.max(0, PHONE.radius - PHONE.bezel) }}

@@ -765,6 +765,14 @@ const ARRIVALS: Arrival[] = [
  */
 const APPROACH = 0.75;
 
+/**
+ * Pulls the horizontal routes into the phone's safe area. The desktop scene
+ * keeps its full spread; below `md`, the smaller resting offsets also shorten
+ * the off-screen approach so labels become readable before reaching the edge
+ * fade.
+ */
+const MOBILE_X_SPREAD = 0.65;
+
 function Education() {
   return (
     // `mask-edges` on all four sides, not just the two the marquee needs: these
@@ -777,42 +785,50 @@ function Education() {
         <Portrait className="relative" style={{ width: 84 }} />
       </div>
 
-      {ARRIVALS.map((arrival) => (
-        <div
-          key={arrival.label}
-          style={
-            {
-              left: `calc(50% + ${arrival.x}px)`,
-              top: `calc(50% + ${arrival.y}px)`,
-              "--from-x": `${Math.round(arrival.x * APPROACH)}px`,
-              "--from-y": `${Math.round(arrival.y * APPROACH)}px`,
-              // The way back in. A chip's resting place is `arrival` away from
-              // the centre, so the centre is exactly that much back the other
-              // way.
-              "--to-x": `${-arrival.x}px`,
-              "--to-y": `${-arrival.y}px`,
-              "--converge-duration": `${arrival.cycle}s`,
-              animationDelay: `${arrival.delay}s`,
-            } as CSSProperties
-          }
-          // `-translate-*` is on the wrapper and the animation is on the
-          // child, because both want `transform` and the wrapper's is what
-          // makes `left`/`top` mean the chip's centre.
-          className="absolute -translate-x-1/2 -translate-y-1/2"
-        >
-          <div className="animate-converge flex items-center gap-2 whitespace-nowrap rounded-full border border-border  px-3 py-1.5">
-            <arrival.Icon
-              size={13}
-              weight="Outline"
-              strokeWidth={1.4}
-              className="shrink-0 text-foreground"
-            />
-            <span className="text-[12px] font-medium tracking-tight text-foreground">
-              {arrival.label}
-            </span>
+      {ARRIVALS.map((arrival) => {
+        const mobileX = Math.round(arrival.x * MOBILE_X_SPREAD);
+
+        return (
+          <div
+            key={arrival.label}
+            style={
+              {
+                left: "calc(50% + var(--arrival-x))",
+                top: `calc(50% + ${arrival.y}px)`,
+                "--arrival-x-mobile": `${mobileX}px`,
+                "--arrival-x-desktop": `${arrival.x}px`,
+                "--from-x-mobile": `${Math.round(mobileX * APPROACH)}px`,
+                "--from-x-desktop": `${Math.round(arrival.x * APPROACH)}px`,
+                "--from-y": `${Math.round(arrival.y * APPROACH)}px`,
+                // The way back in. A chip's resting place is `arrival` away from
+                // the centre, so the centre is exactly that much back the other
+                // way.
+                "--to-x-mobile": `${-mobileX}px`,
+                "--to-x-desktop": `${-arrival.x}px`,
+                "--to-y": `${-arrival.y}px`,
+                "--converge-duration": `${arrival.cycle}s`,
+                animationDelay: `${arrival.delay}s`,
+              } as CSSProperties
+            }
+            // `-translate-*` is on the wrapper and the animation is on the
+            // child, because both want `transform` and the wrapper's is what
+            // makes `left`/`top` mean the chip's centre.
+            className="absolute -translate-x-1/2 -translate-y-1/2 [--arrival-x:var(--arrival-x-mobile)] [--from-x:var(--from-x-mobile)] [--to-x:var(--to-x-mobile)] md:[--arrival-x:var(--arrival-x-desktop)] md:[--from-x:var(--from-x-desktop)] md:[--to-x:var(--to-x-desktop)]"
+          >
+            <div className="animate-converge flex items-center gap-2 whitespace-nowrap rounded-full border border-border  px-3 py-1.5">
+              <arrival.Icon
+                size={13}
+                weight="Outline"
+                strokeWidth={1.4}
+                className="shrink-0 text-foreground"
+              />
+              <span className="text-[12px] font-medium tracking-tight text-foreground">
+                {arrival.label}
+              </span>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

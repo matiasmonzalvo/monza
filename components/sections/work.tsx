@@ -270,17 +270,11 @@ export function Work() {
             a long heading only pushes the rail down the page instead of
             stealing from it. The `md:` variants are where `HEADING` takes
             over. */}
-        <div className="flex flex-col items-center justify-center gap-3 px-6 pb-8 pt-24 text-center sm:px-8 md:gap-[var(--head-gap)] md:pb-[var(--head-pb)] md:pt-[var(--head-pt)]">
-          {/* `length:` is spelled out because a bare variable behind `text-`
-              is ambiguous — Tailwind would read it as a colour.
-
-              Written out in prose rather than shown: Tailwind scans this file
-              as plain text, comments and all, so a class-shaped example in
-              here becomes a real rule in the stylesheet. */}
-          <h2 className="text-6xl font-medium leading-[1.05] tracking-tighter text-foreground md:text-[length:var(--head-title)] lg:text-[length:var(--head-title-lg)]">
-            Work
+        <div className="flex flex-col items-center justify-center gap-3 px-6 pb-20 pt-20 text-center sm:px-8 md:gap-[var(--head-gap)] md:pb-12 md:pt-[var(--head-pt)]">
+          <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
+            Featured Work
           </h2>
-          <p className="max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-[length:var(--head-body)]">
+          <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
             Sites, products and the systems behind them — {WORK.length} projects
             shipped end to end.
           </p>
