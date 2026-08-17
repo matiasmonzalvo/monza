@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
 
 /**
@@ -245,9 +246,16 @@ export function DeviceMirror() {
       const root = frame.contentDocument?.documentElement;
       if (!inner || !root) return;
 
-      const shown = content
-        ? -(gsap.getProperty(content, "y") as number)
-        : window.scrollY;
+      // `#smooth-content` exists in every viewport, but it is only translated
+      // while ScrollSmoother has a non-zero smoothing duration. On touch
+      // devices `smoothTouch: 0` deliberately leaves it at y=0, so using the
+      // node's mere existence as the switch pinned the phone mirror to the
+      // hero. Reduced-motion visitors take the same native-scroll path.
+      const smoother = ScrollSmoother.get();
+      const shown =
+        content && smoother && smoother.smooth() > 0
+          ? -(gsap.getProperty(content, "y") as number)
+          : window.scrollY;
 
       const hostRun =
         document.documentElement.scrollHeight - window.innerHeight;

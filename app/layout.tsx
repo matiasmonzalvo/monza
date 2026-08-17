@@ -40,6 +40,7 @@ const themeScript = `
 
     root.classList.toggle('dark', theme === 'dark');
     root.style.colorScheme = theme;
+    root.style.backgroundColor = themeColor;
     if (themeColorMeta) themeColorMeta.setAttribute('content', themeColor);
     if (colorSchemeMeta) colorSchemeMeta.setAttribute('content', theme);
   }
@@ -61,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} antialiased`}
+      className={`${inter.variable} antialiased dark`}
     >
       <body className="bg-background text-foreground">
         <Script id="theme-init" strategy="beforeInteractive">

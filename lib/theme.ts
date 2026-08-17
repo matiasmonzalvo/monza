@@ -32,6 +32,7 @@ function apply(theme: Theme) {
 
   root.classList.toggle("dark", theme === "dark");
   root.style.colorScheme = theme;
+  root.style.backgroundColor = themeColor;
   document
     .querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     ?.setAttribute("content", themeColor);
