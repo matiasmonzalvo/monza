@@ -138,7 +138,7 @@ export function LandingNavbar({
             <ThemeToggle />
             <Link
               href="/#contact"
-              className="inline-flex h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80 hover:text-foreground"
+              className="inline-flex h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80"
             >
               Get in touch
             </Link>

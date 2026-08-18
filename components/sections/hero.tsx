@@ -21,16 +21,16 @@ export function Hero() {
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="#components"
-            className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-medium text-white transition-all hover:opacity-80 hover:text-foreground"
+            href="#contact"
+            className="inline-flex h-8 items-center rounded-lg bg-primary px-5 text-sm font-medium text-white transition-all hover:opacity-80 hover:text-foreground"
           >
-            View components
+            Get in touch
           </a>
           <a
-            href="#contact"
-            className="inline-flex h-10 items-center rounded-full bg-muted/50 px-5 text-sm font-medium text-foreground backdrop-blur-sm transition-all hover:bg-muted"
+            href="#work"
+            className="inline-flex h-8 items-center rounded-lg bg-muted/50 px-3.5 text-sm font-medium text-foreground backdrop-blur-sm transition-all hover:bg-muted"
           >
-            Work with me
+            Featured Work
           </a>
         </div>
       </div>

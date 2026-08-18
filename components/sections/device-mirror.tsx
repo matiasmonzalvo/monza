@@ -55,6 +55,16 @@ import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
  *  ratio of the two, worked out below — no third number to keep in step.
  * ────────────────────────────────────────────────────────────────
  */
+
+/**
+ * Every line in these devices is a hairline, and there are two of them between
+ * the outside of a chassis and the edge of its screen: the chassis's own, and
+ * the one around the screen cutout. Everything below counts both, which is what
+ * keeps `width` honest — a device really is `width` wide, borders included, and
+ * so the cell it sits in can be sized to the pixel from it.
+ */
+const HAIRLINE = 1;
+
 const MAC = {
   /** The lid's outer box, and the bezel inside it. */
   width: 378,
@@ -85,32 +95,53 @@ const PHONE = {
   islandTop: 7,
 };
 
-/** Inner screen size for a device, from its outer width and its bezel. */
+/**
+ * The band on every side between the outside of a chassis and the inside of
+ * its screen: the chassis's own hairline, the bezel, then the hairline around
+ * the screen cutout.
+ */
+function chromeOf(d: typeof MAC | typeof PHONE) {
+  return HAIRLINE + d.bezel + HAIRLINE;
+}
+
+/**
+ * Inner screen size for a device, from its outer width and its chrome.
+ *
+ * The height is taken to a whole pixel and every size below inherits that. The
+ * cell these sit in clips, so a chassis a fraction of a pixel taller than the
+ * cell holding it loses its outermost row to that clip — and the outermost row
+ * is the border, which is how a device ends up with no line along its top and
+ * bottom edges while every other edge has one.
+ */
 function screenOf(d: typeof MAC | typeof PHONE) {
-  const width = d.width - d.bezel * 2;
-  const height = (width * d.viewport.height) / d.viewport.width;
+  const width = d.width - chromeOf(d) * 2;
+  const height = Math.round((width * d.viewport.height) / d.viewport.width);
   return { width, height, scale: width / d.viewport.width };
 }
 
 const MAC_SCREEN = screenOf(MAC);
 const PHONE_SCREEN = screenOf(PHONE);
 
+/** The outer box of each chassis — the lid, and the whole phone. */
+const MAC_LID = MAC_SCREEN.height + chromeOf(MAC) * 2;
+const PHONE_BODY = PHONE_SCREEN.height + chromeOf(PHONE) * 2;
+
 /** What each device actually occupies, chrome included. */
 const FOOTPRINT = {
   mac: {
     width: MAC.width + MAC.baseOverhang * 2,
-    height: MAC_SCREEN.height + MAC.bezel * 2 + MAC.baseHeight + 2,
+    // One hairline less than the sum of the two, because the base is pulled up
+    // onto the lid's bottom border and they share that row rather than stack.
+    height: MAC_LID + MAC.baseHeight - HAIRLINE,
   },
   phone: {
     width: PHONE.width,
-    height: PHONE_SCREEN.height + PHONE.bezel * 2 + 2,
+    height: PHONE_BODY,
   },
 };
 
 /** The tallest either device gets, so the cell reserves it before mount. */
-const RESERVED = Math.round(
-  Math.max(FOOTPRINT.mac.height, FOOTPRINT.phone.height),
-);
+const RESERVED = Math.max(FOOTPRINT.mac.height, FOOTPRINT.phone.height);
 
 export function DeviceMirror() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -322,8 +353,14 @@ export function DeviceMirror() {
       // one actually takes. Without the first the cell jumps when this mounts;
       // without the second it keeps the unscaled height and leaves a gap under
       // a device that shrank.
+      //
+      // Handed over exactly, fraction and all, because this cell clips: a
+      // height rounded down from what the device occupies takes the shortfall
+      // off the outermost row at each end, and the outermost row is the border
+      // — the top of the lid and the bottom of the base, gone. Unrounded, the
+      // clip boundary sits on the device's own edge and takes nothing.
       style={{
-        height: device ? Math.round(FOOTPRINT[device].height * fit) : RESERVED,
+        height: device ? FOOTPRINT[device].height * fit : RESERVED,
       }}
       className="flex w-full my-6 items-center justify-center overflow-hidden"
     >
@@ -352,30 +389,47 @@ function MacBook({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col items-center">
       <div
         style={{ padding: MAC.bezel, borderRadius: MAC.radius }}
-        className="border border-border-strong bg-surface-2 shadow-sm"
+        className="border border-border-strong bg-background shadow-sm"
       >
         <div
-          style={{ borderRadius: Math.max(0, MAC.radius - MAC.bezel) }}
-          // The inner radius is the outer one minus the bezel, so the gap
-          // between the two curves stays even all the way round instead of
-          // pinching on the diagonal. Same rule the dropdown's panel uses.
-          className="overflow-hidden border border-border"
+          style={{
+            borderRadius: Math.max(0, MAC.radius - HAIRLINE - MAC.bezel),
+          }}
+          // The inner radius is the outer one minus everything that sits
+          // between the two curves — the lid's own hairline and the bezel — so
+          // the gap stays even all the way round instead of pinching on the
+          // diagonal. Same rule the dropdown's panel uses.
+          className="overflow-hidden border border-border-strong"
         >
           {children}
         </div>
       </div>
 
-      {/* Base. */}
+      {/* Base. Bordered on all four sides and pulled up a hairline, so its top
+          border lands on the row the lid's bottom border already occupies. The
+          two merge into a single unbroken line the full width of the base: it
+          carries on past the lid and along the top of each wing, where before
+          it stopped where the lid stopped and left the wings open. */}
       <div
         style={{
           width: MAC.width + MAC.baseOverhang * 2,
           height: MAC.baseHeight,
+          marginTop: -HAIRLINE,
         }}
-        className="relative rounded-b-[7px] border-x border-b border-border-strong bg-surface"
+        className="relative rounded-b-[7px] border border-border-strong bg-background"
       >
+        {/* The lip. Its bottom border is laid on top of the base's own instead
+            of a pixel above it, which is what keeps the front edge one line
+            thick rather than two across the middle. Left open at the top: that
+            edge is where it gives on to the base, and a line there would read
+            as a pill sitting in the base rather than a lip cut into it. */}
         <div
-          style={{ width: MAC.lipWidth, height: MAC.lipHeight }}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-b-full border-x border-b border-border-strong bg-surface-2"
+          style={{
+            width: MAC.lipWidth,
+            height: MAC.lipHeight + HAIRLINE,
+            bottom: -HAIRLINE,
+          }}
+          className="absolute left-1/2 -translate-x-1/2 rounded-b-full border-x border-b border-border-strong bg-surface-2"
         />
       </div>
     </div>
@@ -390,8 +444,10 @@ function IPhone({ children }: { children: React.ReactNode }) {
       className="relative border border-border-strong bg-background shadow-sm"
     >
       <div
-        style={{ borderRadius: Math.max(0, PHONE.radius - PHONE.bezel) }}
-        className="overflow-hidden border border-border"
+        style={{
+          borderRadius: Math.max(0, PHONE.radius - HAIRLINE - PHONE.bezel),
+        }}
+        className="overflow-hidden border border-border-strong"
       >
         {children}
       </div>

@@ -42,6 +42,14 @@ const CONFIG = {
    * first word lighting up as the paragraph clears the fold and the last one
    * landing while the block still sits above the middle of the screen, so the
    * sentence is never finishing off-screen.
+   *
+   * These are the defaults, not the law: both are overridable per instance,
+   * because how much scroll a paragraph gets is a fact about where it sits on
+   * the page rather than about this component. The distance between them is
+   * what the fill costs in scroll — `0.85vh - end% · vh + <paragraph height>` —
+   * so raising `end` toward 100% both speeds the fill up and cuts the room the
+   * paragraph needs beneath it. The last block on a page is the case that
+   * needs it: there is no next section to keep scrolling into.
    */
   start: "top 85%",
   end: "bottom 45%",
@@ -50,9 +58,14 @@ const CONFIG = {
 export function RevealText({
   text,
   className = "",
+  start = CONFIG.start,
+  end = CONFIG.end,
 }: {
   text: string;
   className?: string;
+  /** Overrides for `CONFIG.start` / `CONFIG.end`, in ScrollTrigger's terms. */
+  start?: string;
+  end?: string;
 }) {
   const ref = useRef<HTMLParagraphElement>(null);
 
@@ -106,8 +119,8 @@ export function RevealText({
           stagger: { amount: 1, ease: "none" },
           scrollTrigger: {
             trigger: paragraph,
-            start: CONFIG.start,
-            end: CONFIG.end,
+            start,
+            end,
             // Plain `true`: ScrollSmoother already eases the page, and a
             // second lag on top of it reads as lost input.
             scrub: true,
@@ -120,7 +133,7 @@ export function RevealText({
     return () => {
       mm.revert();
     };
-  }, [text]);
+  }, [text, start, end]);
 
   return (
     <p ref={ref} className={className}>
