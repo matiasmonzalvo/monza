@@ -31,7 +31,11 @@ export default function Home() {
             The line you see there is that connector's own top edge, and it
             leaves with it when the two halves pull apart. */}
         <Frame>
-          <Section id="formation" bordered={false}>
+          <Section
+            id="formation"
+            bordered={false}
+            className="border-b-0"
+          >
             <Formation />
           </Section>
         </Frame>
@@ -44,7 +48,7 @@ export default function Home() {
         <PlugSeam />
 
         <Frame>
-          <Section id="skills">
+          <Section id="skills" className="border-t-0">
             <Skills />
           </Section>
 

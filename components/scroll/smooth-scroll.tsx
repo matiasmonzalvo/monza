@@ -46,11 +46,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     if (window.self !== window.top) return;
 
     const mm = gsap.matchMedia();
+    let smoother: ScrollSmoother | null = null;
 
     // Never created when the visitor asked for less motion — the two divs are
     // then inert and the page scrolls natively, which is the honest fallback.
     mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const smoother = ScrollSmoother.create({
+      smoother = ScrollSmoother.create({
         wrapper,
         content,
         smooth: 1.2,
@@ -64,70 +65,82 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         ignoreMobileResize: true,
       });
 
-      /**
-       * ScrollSmoother does not intercept in-page anchors, and the browser
-       * cannot resolve them itself: the content is transformed, so an
-       * element's document position no longer matches where it is drawn.
-       *
-       * Capture phase, and `preventDefault` only — `next/link` checks
-       * `defaultPrevented` before navigating, so bailing out here is enough
-       * to stop the router without also stopping propagation, which would
-       * swallow the click handlers the links carry (the mobile drawer's
-       * close, for one).
-       */
-      const onClick = (event: MouseEvent) => {
-        if (
-          event.button !== 0 ||
-          event.metaKey ||
-          event.ctrlKey ||
-          event.shiftKey ||
-          event.altKey
-        )
-          return;
-
-        const clicked = event.target;
-        const anchor =
-          clicked instanceof Element ? clicked.closest("a") : null;
-        if (!anchor || anchor.hasAttribute("download") || anchor.target) return;
-
-        // Resolved against the page, so `#work` and `/#work` arrive the same.
-        // A `mailto:` lands here too and falls out on the origin check.
-        const url = new URL(anchor.href, window.location.href);
-        // Same document, different spot. Anything else is a real navigation.
-        if (
-          url.origin !== window.location.origin ||
-          url.pathname !== window.location.pathname ||
-          !url.hash
-        )
-          return;
-
-        const section = document.getElementById(
-          decodeURIComponent(url.hash.slice(1)),
-        );
-        if (!section) return;
-
-        event.preventDefault();
-        // `scrollTo` measures through pins, so a pinned section still lands on
-        // its own start rather than somewhere inside the pinned run.
-        smoother.scrollTo(section, true, "top top");
-        window.history.pushState(null, "", url.hash);
-      };
-
       // Images arriving late change the document height, and every pin after
       // them is measured against the old one.
       const onLoad = () => ScrollTrigger.refresh();
 
-      document.addEventListener("click", onClick, true);
       window.addEventListener("load", onLoad);
 
       return () => {
-        document.removeEventListener("click", onClick, true);
         window.removeEventListener("load", onLoad);
-        smoother.kill();
+        smoother?.kill();
+        smoother = null;
       };
     });
 
+    /**
+     * Scroll section links ourselves so they never write a hash to the URL.
+     * Capture phase, and `preventDefault` only — `next/link` checks
+     * `defaultPrevented` before navigating, while the mobile drawer's own
+     * click handler can still run and close it.
+     */
+    const onClick = (event: MouseEvent) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+
+      const clicked = event.target;
+      const anchor = clicked instanceof Element ? clicked.closest("a") : null;
+      if (!anchor || anchor.hasAttribute("download") || anchor.target) return;
+
+      // Resolved against the page, so `#work` and `/#work` arrive the same.
+      // A `mailto:` lands here too and falls out on the origin check.
+      const url = new URL(anchor.href, window.location.href);
+      // Same document, different spot. Anything else is a real navigation.
+      if (
+        url.origin !== window.location.origin ||
+        url.pathname !== window.location.pathname ||
+        !url.hash
+      )
+        return;
+
+      const section = document.getElementById(
+        decodeURIComponent(url.hash.slice(1)),
+      );
+      if (!section) return;
+
+      event.preventDefault();
+
+      const navbar = document.querySelector<HTMLElement>(
+        "[data-landing-navbar]",
+      );
+      const navbarHeight = navbar?.getBoundingClientRect().height ?? 0;
+
+      if (smoother) {
+        // `offset` measures through pins, so a pinned section still resolves
+        // to its real start. Leaving room for the fixed navbar keeps that
+        // start visible instead of tucking it beneath the bar.
+        const destination =
+          smoother.offset(section, "top top") - navbarHeight;
+        smoother.scrollTo(Math.max(0, destination), true);
+        return;
+      }
+
+      // Reduced-motion fallback: keep the same alignment without animation.
+      const destination =
+        window.scrollY + section.getBoundingClientRect().top - navbarHeight;
+      window.scrollTo({ top: Math.max(0, destination), behavior: "auto" });
+    };
+
+    document.addEventListener("click", onClick, true);
+
     return () => {
+      document.removeEventListener("click", onClick, true);
       mm.revert();
     };
   }, []);

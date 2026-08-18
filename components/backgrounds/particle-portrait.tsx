@@ -316,7 +316,13 @@ function sample(
   return thinned;
 }
 
-export function ParticlePortrait({ className = "" }: { className?: string }) {
+export function ParticlePortrait({
+  className = "",
+  src = CONFIG.src,
+}: {
+  className?: string;
+  src?: string;
+}) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
@@ -550,7 +556,7 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
 
     image.decoding = "async";
     image.addEventListener("load", start, { once: true });
-    image.src = CONFIG.src;
+    image.src = src;
     if (image.complete) start();
 
     return () => {
@@ -565,7 +571,7 @@ export function ParticlePortrait({ className = "" }: { className?: string }) {
       image.removeEventListener("load", start);
       repaintRef.current = () => {};
     };
-  }, []);
+  }, [src]);
 
   // A theme flip only changes what the next frame is painted with — and with
   // motion off there is no next frame, so ask for one.

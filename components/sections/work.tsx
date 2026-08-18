@@ -43,7 +43,7 @@ import { WORK } from "@/lib/work";
  * ────────────────────────────────────────────────────────────────
  */
 const SHOT = {
-  desktop: 1,
+  desktop: 0.58,
   mobile: 1.6,
 };
 
@@ -70,18 +70,18 @@ const TILT = "perspective(1200px) rotateX(-40deg) rotateY(0deg) rotateZ(0deg)";
 
 /**
  * ────────────────────────────────────────────────────────────────
- *  THE HEADING — how much of a short screen it may take.
+ *  THE HEADING — what a short screen is allowed to hide.
  *
- *  From `md` up the section is exactly one viewport tall, so every pixel the
- *  heading spends comes straight off `--shot-md`. Fixed padding and a fixed
- *  title were fine on a tall screen and wrong on a short one: at 1440×620 the
- *  old `pt-24` plus a 72px title ate ~240px of a 620px band, and the rail was
- *  left with less than what the caption underneath it takes.
+ *  From `md` up the section is at least one viewport tall, but it may grow
+ *  beyond it. The rail keeps its preferred shot height and ScrollTrigger pins
+ *  the section with its bottom aligned to the viewport whenever the combined
+ *  heading and rail are taller than the screen. The excess therefore leaves
+ *  through the top of the viewport and comes out of the heading, never out of
+ *  the project image or caption.
  *
  *  So each number here is a range — a floor, a share of the viewport height,
  *  and a ceiling. The ceiling is what a tall screen already showed, which is
- *  why nothing moves above roughly 1000px of height; below that the heading
- *  gives its room back to the shots instead of squeezing them.
+ *  why nothing moves above roughly 1000px of height.
  *
  *  Only the title has two ceilings: it steps up at `lg`, as it always did.
  * ────────────────────────────────────────────────────────────────
@@ -123,6 +123,7 @@ export function Work() {
       // and the column is centred in the space left over without it. Half a
       // scrollbar of drift against a 1px rule reads as a mistake, not a choice.
       const screen = document.documentElement.clientWidth;
+      const screenHeight = document.documentElement.clientHeight;
 
       // `--rail`: the gap between the screen edge and the actual page column,
       // so the first card starts and the last one ends exactly on its rails.
@@ -141,27 +142,25 @@ export function Work() {
         `${Math.round((screen * SHOT.mobile) / TYPICAL_RATIO)}px`,
       );
 
-      // `--shot-md`: the desktop height — `SHOT.desktop` of whatever the band
-      // has left once its own padding and a caption are out.
+      // `--shot-md`: the desktop's preferred height is `SHOT.desktop` of the
+      // viewport. The only cap is the room the viewport has after the rail's
+      // own padding and a caption are out, so the whole project always fits.
       //
-      // Read off the DOM instead of spelled out as `calc(100svh - 400px)`,
-      // because the heading above is responsive and rewordable and a number
-      // baked in here would quietly stop matching the first time it changes.
-      //
-      // No loop hides in this: the band is `flex-1` of a `svh` section so its
-      // height owes nothing to the cards, and the caption's is fixed by its
-      // own class — which is also why that class has to stay a fixed height.
+      // The heading is deliberately absent. If the complete section is taller
+      // than the screen, the pin start below lets the heading cross the top
+      // edge until this rail fits instead of shrinking the cards to make room.
       const trackStyle = getComputedStyle(track);
       const caption = track.querySelector<HTMLElement>("[data-caption]");
-      const free =
-        viewport.clientHeight -
+      const available =
+        screenHeight -
         parseFloat(trackStyle.paddingTop) -
         parseFloat(trackStyle.paddingBottom) -
         (caption?.offsetHeight ?? 0);
+      const preferred = screenHeight * SHOT.desktop;
 
       section.style.setProperty(
         "--shot-md",
-        `${Math.max(0, Math.round(free * SHOT.desktop))}px`,
+        `${Math.max(0, Math.round(Math.min(preferred, available)))}px`,
       );
     };
 
@@ -187,12 +186,22 @@ export function Work() {
         const distance = () =>
           Math.max(0, track.offsetWidth - viewport.clientWidth);
 
+        // A tall section first travels just far enough to put its bottom on the
+        // viewport's bottom. That movement clips only the heading above; once
+        // the horizontal sequence starts, the complete rail is visible and
+        // the whole section is fixed. Tall screens that fit everything keep
+        // the original top-to-top pin.
+        const pinStart = () =>
+          section.offsetHeight > document.documentElement.clientHeight
+            ? "bottom bottom"
+            : "top top";
+
         gsap.to(track, {
           x: () => -distance(),
           ease: "none",
           scrollTrigger: {
             trigger: section,
-            start: "top top",
+            start: pinStart,
             end: () => `+=${distance()}`,
             pin: true,
             // Plain `true`, not a number: ScrollSmoother already eases the
@@ -258,7 +267,7 @@ export function Work() {
       // `--shot` is the height every image shares, and the breakpoint picks
       // which of the two measured candidates it reads. The literals are only
       // the floor for a visitor with no JS — the knob is `SHOT`, above.
-      className="relative -mt-px flex w-full flex-col border-b border-border [--shot:var(--shot-sm,50vw)] md:h-svh md:[--shot:var(--shot-md,58svh)]"
+      className="relative -mt-px flex w-full flex-col border-b border-border [--shot:var(--shot-sm,50vw)] md:min-h-svh md:[--shot:var(--shot-md,58svh)]"
     >
       {/* Heading — the last thing here that obeys the page column. */}
       <div
@@ -284,7 +293,7 @@ export function Work() {
       {/* Full-bleed track. */}
       <div
         ref={viewportRef}
-        className="relative overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:min-h-0 md:flex-1 md:snap-x md:snap-mandatory [&::-webkit-scrollbar]:hidden"
+        className="relative overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:flex-none md:snap-x md:snap-mandatory [&::-webkit-scrollbar]:hidden"
       >
         {/* The rail's own padding, so `track.offsetWidth` already carries both
             ends and the travel maths below needs no adjusting. `max()` holds
@@ -292,7 +301,7 @@ export function Work() {
             the first paint, before `--rail` has been measured. */}
         <div
           ref={trackRef}
-          className="flex w-max items-start gap-6 px-[max(1.5rem,var(--rail,0px))] py-8 sm:gap-5 md:h-full"
+          className="flex w-max items-start gap-6 px-[max(1.5rem,var(--rail,0px))] py-8 sm:gap-5"
         >
           {WORK.map((item) => (
             <article

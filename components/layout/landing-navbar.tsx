@@ -54,9 +54,9 @@ const STYLES = {
 } satisfies Record<NavbarVersion, Record<string, string>>;
 
 const NAV = [
+  { label: "About", href: "/#about" },
   { label: "Work", href: "/#work" },
-  { label: "Components", href: "/#components" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Skills", href: "/#skills" },
 ];
 
 const MENU_ID = "landing-navbar-menu";
@@ -112,9 +112,10 @@ export function LandingNavbar({
         {/* Content sits above the shape. */}
         <nav
           aria-label="Main"
+          data-landing-navbar
           className="relative flex h-14 items-center gap-3 px-4 sm:gap-6"
         >
-          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <Link href="/#top" className="flex shrink-0 items-center gap-2.5">
             <span className="text-xl font-medium tracking-tight text-foreground">
               Monza<span className="text-primary">.</span>
             </span>
@@ -137,15 +138,9 @@ export function LandingNavbar({
             <ThemeToggle />
             <Link
               href="/#contact"
-              className="hidden h-7 shrink-0 items-center rounded-lg bg-muted px-3.5 text-[13px] font-semibold tracking-tight text-foreground transition-opacity hover:opacity-80 hover:text-foreground sm:inline-flex"
+              className="inline-flex h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80 hover:text-foreground"
             >
               Get in touch
-            </Link>
-            <Link
-              href="/#contact"
-              className="hidden h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80 hover:text-foreground sm:inline-flex"
-            >
-              Browse components
             </Link>
 
             <button

@@ -1,6 +1,7 @@
 import { ParticleKeyboard } from "@/components/backgrounds/particle-keyboard";
 import { Cell, CellGrid } from "@/components/layout/grid";
 import { RevealText } from "@/components/scroll/reveal-text";
+import { Handshake } from "reicon-react";
 
 const COPY =
   "I'm a 22yo product designer based in Buenos Aires. I turn complex problems into clear, useful digital products, moving from early strategy to shipped details and building the systems that keep every experience coherent as it grows.";
@@ -27,8 +28,14 @@ function Fact({ value, label }: (typeof FACTS)[number]) {
 export function About() {
   return (
     <>
-      <div className="px-6 pt-12 sm:px-8 md:pt-36 md:pb-0">
+      <div className="px-6 pt-12 sm:px-8 md:pt-32 md:pb-0">
         <div className="mx-auto max-w-4xl">
+          <div className="flex items-center gap-2 text-subtle mb-4">
+            <Handshake size={24} weight="Filled" strokeWidth={1.5} />
+            <span className="text-lg text-muted-foreground text-medium tracking-tight">
+              I'm Matias Monzalvo
+            </span>
+          </div>
           <RevealText
             text={COPY}
             className="text-balance text-2xl font-medium leading-[1.2] tracking-tight text-foreground sm:text-4xl md:text-5xl md:leading-[1.15]"

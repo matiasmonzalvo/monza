@@ -733,9 +733,25 @@ export function PlugSeam() {
       // rather than moved so they never leave the band, and the dust is painted
       // into a canvas that already ends where the band does. Which leaves the
       // bars free to hang their outlines a pixel over each edge, where the two
-      // blocks meet them.
-      className="relative h-[calc(var(--bar)*2_+_var(--gap))] w-full [--bar:var(--bar-sm)] [--gap:var(--gap-sm)] [--tri-h:var(--tri-h-sm)] [--tri-w:var(--tri-w-sm)] md:[--bar:var(--bar-md)] md:[--gap:var(--gap-md)] md:[--tri-h:var(--tri-h-md)] md:[--tri-w:var(--tri-w-md)]"
+      // blocks meet them. The local stacking context also keeps the boundary
+      // guards below in front of both neighbouring frames while the hardware
+      // itself remains above the guards.
+      className="relative z-[1] isolate h-[calc(var(--bar)*2_+_var(--gap))] w-full [--bar:var(--bar-sm)] [--gap:var(--gap-sm)] [--tri-h:var(--tri-h-sm)] [--tri-w:var(--tri-w-sm)] md:[--bar:var(--bar-md)] md:[--gap:var(--gap-md)] md:[--tri-h:var(--tri-h-md)] md:[--tri-w:var(--tri-w-md)]"
     >
+      {/* The seam owns both joins. Each guard reaches one pixel into the
+          neighbouring frame and clears any horizontal rule there; the bars
+          are z-10/z-20, so their moving rims are then the only lines allowed
+          to paint across those joins. This is explicit instead of leaving a
+          shared pixel to subpixel antialiasing on mobile compositors. The
+          guards use PLATE's width so they erase the horizontal run without
+          breaking the vertical rails. */}
+      <span
+        className={`pointer-events-none absolute inset-x-0 -top-px z-0 h-px bg-background ${PLATE}`}
+      />
+      <span
+        className={`pointer-events-none absolute inset-x-0 -bottom-px z-0 h-px bg-background ${PLATE}`}
+      />
+
       {/* ── The upper half: the end of the block above, reaching down. ── */}
       <div className="absolute inset-x-0 top-0 z-10">
         {/* The neck. Flat against the block at rest and drawn out to full

@@ -57,7 +57,7 @@ import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
  */
 const MAC = {
   /** The lid's outer box, and the bezel inside it. */
-  width: 428,
+  width: 378,
   bezel: 11,
   /** Radius of the lid, and of the screen cutout inside it. */
   radius: 16,
@@ -325,7 +325,7 @@ export function DeviceMirror() {
       style={{
         height: device ? Math.round(FOOTPRINT[device].height * fit) : RESERVED,
       }}
-      className="flex w-full items-center justify-center overflow-hidden"
+      className="flex w-full my-6 items-center justify-center overflow-hidden"
     >
       {device ? (
         <div

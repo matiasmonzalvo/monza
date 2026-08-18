@@ -1,4 +1,5 @@
 import { ArrowRight } from "reicon-react";
+import { ParticlePortrait } from "@/components/backgrounds/particle-portrait";
 import { GmailIcon, LinkedInIcon, XIcon } from "@/components/icons/brand";
 import { Cell, CellGrid } from "@/components/layout/grid";
 
@@ -36,6 +37,10 @@ export function Contact() {
             Start a conversation
           </a>
         </div>
+      </Cell>
+
+      <Cell className="flex h-[42vh] min-h-0 flex-col overflow-hidden">
+        <ParticlePortrait src="/contact-illustration.png" />
       </Cell>
 
       <Cell className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-border">
