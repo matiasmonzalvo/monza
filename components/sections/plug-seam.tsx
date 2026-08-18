@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { GUTTER } from "@/components/layout/grid";
 import { useTheme } from "@/lib/theme";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
@@ -207,6 +208,10 @@ const TAU = Math.PI * 2;
  * border would. 1198 plus a pixel of rim either side lands the bar's edges on
  * exactly the pixels the frame's rails occupy. Below the column it is the same
  * trade, held with `calc`.
+ *
+ * Both widths are read off whatever box this is dropped into, so putting the
+ * gutter on that box is all it takes for the hardware to stay on the frame's
+ * rails once the column reaches the viewport.
  */
 const PLATE = "mx-auto w-[calc(100%_-_2px)] max-w-[1198px]";
 
@@ -744,16 +749,26 @@ export function PlugSeam() {
           to paint across those joins. This is explicit instead of leaving a
           shared pixel to subpixel antialiasing on mobile compositors. The
           guards use PLATE's width so they erase the horizontal run without
-          breaking the vertical rails. */}
-      <span
-        className={`pointer-events-none absolute inset-x-0 -top-px z-0 h-px bg-background ${PLATE}`}
-      />
-      <span
-        className={`pointer-events-none absolute inset-x-0 -bottom-px z-0 h-px bg-background ${PLATE}`}
-      />
+          breaking the vertical rails — which is also why each one is guttered
+          in a box of its own rather than stretched across the band: a guard
+          measured against the full screen would reach past the frame's rails
+          and rub out a pixel of the very line it is there to protect. */}
+      <div
+        className={`pointer-events-none absolute inset-x-0 -top-px z-0 h-px ${GUTTER}`}
+      >
+        <span className={`block h-full bg-background ${PLATE}`} />
+      </div>
+      <div
+        className={`pointer-events-none absolute inset-x-0 -bottom-px z-0 h-px ${GUTTER}`}
+      >
+        <span className={`block h-full bg-background ${PLATE}`} />
+      </div>
 
-      {/* ── The upper half: the end of the block above, reaching down. ── */}
-      <div className="absolute inset-x-0 top-0 z-10">
+      {/* ── The upper half: the end of the block above, reaching down. ──
+          Guttered, because everything in here is column-width hardware and has
+          to stay on the rails of the block it is the end of. The canvas at the
+          bottom of this file is the part that stays full-bleed. */}
+      <div className={`absolute inset-x-0 top-0 z-10 ${GUTTER}`}>
         {/* The neck. Flat against the block at rest and drawn out to full
             length by the close — the rails it carries are the block's own,
             which is the whole reason the connector reads as part of it. */}
@@ -778,7 +793,7 @@ export function PlugSeam() {
       </div>
 
       {/* ── The lower half: the start of the block below, reaching up. ── */}
-      <div className="absolute inset-x-0 bottom-0 z-20">
+      <div className={`absolute inset-x-0 bottom-0 z-20 ${GUTTER}`}>
         {/* `z-10` is load-bearing here, and it is the one asymmetry between the
             two halves worth knowing about.
 
@@ -849,9 +864,10 @@ export function PlugSeam() {
           Which is the right reading anyway — it is what the contact throws off,
           not something the hardware is standing in front of.
 
-          Full-bleed, so the burst can leave the column. It needs no clipping to
-          stay put: motes are painted into the canvas's own bitmap, and that
-          ends exactly where the band does. */}
+          Full-bleed, and the one thing in the band that takes no gutter: the
+          burst has to be able to leave the column and carry on to the screen
+          edge. It needs no clipping to stay put either — motes are painted into
+          the canvas's own bitmap, and that ends exactly where the band does. */}
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 z-30 h-full w-full"

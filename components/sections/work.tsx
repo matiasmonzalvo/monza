@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Eyebrow } from "@/components/layout/grid";
+import { GUTTER } from "@/components/layout/grid";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
 import { WORK } from "@/lib/work";
 
@@ -128,7 +128,9 @@ export function Work() {
       // `--rail`: the gap between the screen edge and the actual page column,
       // so the first card starts and the last one ends exactly on its rails.
       // Measuring the `max-w-6xl` element keeps the two in step without
-      // duplicating Tailwind's container width here as a magic number.
+      // duplicating Tailwind's container width here as a magic number — and it
+      // picks up the gutter for free, so once the viewport is down to the
+      // column this is simply the gutter and the track's own floor takes over.
       const columnWidth = column.getBoundingClientRect().width;
       section.style.setProperty(
         "--rail",
@@ -269,31 +271,38 @@ export function Work() {
       // the floor for a visitor with no JS — the knob is `SHOT`, above.
       className="relative -mt-px flex w-full flex-col border-b border-border [--shot:var(--shot-sm,50vw)] md:min-h-svh md:[--shot:var(--shot-md,58svh)]"
     >
-      {/* Heading — the last thing here that obeys the page column. */}
-      <div
-        ref={columnRef}
-        className="mx-auto w-full max-w-6xl border-x border-border"
-      >
-        {/* The literals are the heading as it has always looked, and all a
-            phone ever sees: below `md` the section is not one viewport tall, so
-            a long heading only pushes the rail down the page instead of
-            stealing from it. The `md:` variants are where `HEADING` takes
-            over. */}
-        <div className="flex flex-col items-center justify-center gap-3 px-6 pb-20 pt-20 text-center sm:px-8 md:gap-[var(--head-gap)] md:pb-12 md:pt-[var(--head-pt)]">
-          <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
-            Featured Work
-          </h2>
-          <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
-            Sites, products and the systems behind them — {WORK.length} projects
-            shipped end to end.
-          </p>
+      {/* Heading — the last thing here that obeys the page column, and so the
+          only thing in this section that takes the gutter. The rail and the
+          track below it are full-bleed by design and stay that way. */}
+      <div className={GUTTER}>
+        <div
+          ref={columnRef}
+          className="mx-auto w-full max-w-6xl border-x border-border"
+        >
+          {/* The literals are the heading as it has always looked, and all a
+              phone ever sees: below `md` the section is not one viewport tall,
+              so a long heading only pushes the rail down the page instead of
+              stealing from it. The `md:` variants are where `HEADING` takes
+              over. */}
+          <div className="flex flex-col items-center justify-center gap-3 px-6 pb-20 pt-20 text-center sm:px-8 md:gap-[var(--head-gap)] md:pb-12 md:pt-[var(--head-pt)]">
+            <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
+              Featured Work
+            </h2>
+            <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
+              Sites, products and the systems behind them — {WORK.length}{" "}
+              projects shipped end to end.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Full-bleed track. */}
       <div
         ref={viewportRef}
-        className="relative overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:flex-none md:snap-x md:snap-mandatory [&::-webkit-scrollbar]:hidden"
+        // On tall screens the section's `min-h-svh` can leave a little free
+        // space. `mt-auto` spends it above the rail, keeping the rail and the
+        // section's bottom rule flush with the bottom of the pinned viewport.
+        className="relative overflow-x-auto overflow-y-hidden border-t border-border [scrollbar-width:none] md:mt-auto md:flex-none md:snap-x md:snap-mandatory [&::-webkit-scrollbar]:hidden"
       >
         {/* The rail's own padding, so `track.offsetWidth` already carries both
             ends and the travel maths below needs no adjusting. `max()` holds
@@ -354,7 +363,7 @@ export function Work() {
                     The space between them is spelled out: JSX drops whitespace
                     that spans a newline, so without it the two would butt up
                     against each other. */}
-                <div className="text-pretty text-lg font-medium leading-[1.25] tracking-tight px-4 max-w-sm md:max-w-none">
+                <div className="text-pretty text-[15px] 2xl:text-lg font-medium leading-[1.25] tracking-tight px-4 max-w-sm md:max-w-none">
                   <h3 className="inline text-foreground">{item.title}.</h3>{" "}
                   <p className="inline text-muted-foreground ">
                     {item.description}

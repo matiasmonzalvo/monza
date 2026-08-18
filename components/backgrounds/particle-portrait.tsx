@@ -41,28 +41,21 @@ type PortraitProfile = {
 const CONFIG = {
   /** Source art. Dark ink on a light — or transparent — ground is what samples well. */
   src: "/hero-illustration.png",
+  /** Known up front so sections below do not shift when the PNG finishes loading. */
+  aspectRatio: "961 / 1108",
   maxDpr: 2,
 
-  /**
-   * Where the canvas sits. It is not an overlay: it is the last item in the
-   * hero's flex column, so the space it gets is whatever the headline block
-   * above it does not use, on any screen. Nothing here has to guess at the
-   * viewport height, and it can never end up under the text.
-   */
+  /** Where the canvas sits inside its section. */
   layout: {
     /**
-     * Share of that leftover space the canvas takes; its width follows the
-     * art's own ratio. 100% fills it. Since the canvas hangs off the bottom,
-     * anything less is air between the drawing and the buttons — and a cap
-     * like `min(100%, 700px)` keeps it from running away on a tall screen.
+     * Desktop is width-driven: the art keeps this width and its own aspect
+     * ratio supplies the height of both the canvas and its section. The
+     * available-width guard only matters before the mobile layout takes over.
      */
-    height: "100%",
+    widthDesktop: "min(28rem, calc(100% - 3rem))",
     /**
-     * Below `lg` the hero stacks instead of being a flex column, so there is
-     * no leftover for the canvas to take — and since the canvas is out of flow
-     * inside its wrapper, without a height of its own here the wrapper would
-     * collapse to nothing. This is that height, and it is the whole band the
-     * drawing gets on a phone.
+     * On mobile the canvas remains absolutely positioned, so its wrapper owns
+     * the height of the complete drawing band.
      */
     heightMobile: "42vh",
     /** Nudge off dead centre. "-40px" slides the figure left. */
@@ -317,9 +310,11 @@ function sample(
 }
 
 export function ParticlePortrait({
+  aspectRatio = CONFIG.aspectRatio,
   className = "",
   src = CONFIG.src,
 }: {
+  aspectRatio?: string;
   className?: string;
   src?: string;
 }) {
@@ -571,7 +566,7 @@ export function ParticlePortrait({
       image.removeEventListener("load", start);
       repaintRef.current = () => {};
     };
-  }, [src]);
+  }, [aspectRatio, src]);
 
   // A theme flip only changes what the next frame is painted with — and with
   // motion off there is no next frame, so ask for one.
@@ -587,11 +582,11 @@ export function ParticlePortrait({
     <div
       ref={wrapRef}
       aria-hidden="true"
-      className={`pointer-events-none relative z-[5] h-[var(--portrait-height)] min-h-0 w-full flex-1 overflow-hidden lg:h-auto ${className}`.trim()}
+      className={`pointer-events-none relative z-[5] h-[var(--portrait-height)] min-h-0 w-full flex-1 overflow-hidden lg:flex lg:h-auto lg:flex-none lg:justify-center ${className}`.trim()}
       style={
         {
-          // A class rather than an inline height, so `lg:h-auto` can hand the
-          // sizing back to the flex column — an inline one would outrank it.
+          // A class rather than an inline height lets `lg:h-auto` switch the
+          // desktop wrapper to the canvas's natural, width-driven height.
           "--portrait-height": CONFIG.layout.heightMobile,
           maskImage: fade,
           WebkitMaskImage: fade,
@@ -600,18 +595,17 @@ export function ParticlePortrait({
     >
       <canvas
         ref={canvasRef}
-        style={{
-          position: "absolute",
-          bottom: CONFIG.layout.lift,
-          left: "50%",
-          height: CONFIG.layout.height,
-          // A leftover space taller than it is wide would push the drawing out
-          // past the sides; capping the width makes the art fit to it instead.
-          maxWidth: "100%",
-          // Placeholder until the art loads and replaces it with its own ratio.
-          aspectRatio: "1 / 1",
-          transform: `translateX(calc(-50% + ${CONFIG.layout.shift}))`,
-        }}
+        className="absolute bottom-[var(--portrait-lift)] left-1/2 h-full max-w-full -translate-x-1/2 lg:relative lg:bottom-auto lg:left-auto lg:h-auto lg:w-[var(--portrait-width)] lg:translate-x-0"
+        style={
+          {
+            "--portrait-lift": CONFIG.layout.lift,
+            "--portrait-width": CONFIG.layout.widthDesktop,
+            // The image load confirms this value, but publishing the known
+            // ratio now prevents downstream scroll positions from shifting.
+            aspectRatio,
+            marginLeft: CONFIG.layout.shift,
+          } as CSSProperties
+        }
       />
     </div>
   );

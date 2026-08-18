@@ -2,9 +2,9 @@ import { Frame, Section } from "@/components/layout/grid";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { About } from "@/components/sections/about";
 import { ComponentLibrary } from "@/components/sections/component-library";
-import { Contact } from "@/components/sections/contact";
+import { Contact, ContactPortrait } from "@/components/sections/contact";
 import { Formation } from "@/components/sections/formation";
-import { Hero } from "@/components/sections/hero";
+import { Hero, HeroPortrait } from "@/components/sections/hero";
 import { PlugSeam } from "@/components/sections/plug-seam";
 import { Skills } from "@/components/sections/skills";
 import { Work } from "@/components/sections/work";
@@ -13,10 +13,11 @@ export default function Home() {
   return (
     <>
       <main className="flex-1">
-        {/* Hero and About share the same rails so the portrait, animated copy,
-            keyboard and facts read as one continuous opening sequence. */}
-        <Frame>
-          <Hero />
+        {/* The opening copy stays outside the page grid. Its rails begin with
+            the portrait and continue through About as one opening sequence. */}
+        <Hero />
+        <Frame capped>
+          <HeroPortrait />
           <Section id="about">
             <About />
           </Section>
@@ -31,11 +32,7 @@ export default function Home() {
             The line you see there is that connector's own top edge, and it
             leaves with it when the two halves pull apart. */}
         <Frame>
-          <Section
-            id="formation"
-            bordered={false}
-            className="border-b-0"
-          >
+          <Section id="formation" bordered={false} className="border-b-0">
             <Formation />
           </Section>
         </Frame>
@@ -47,7 +44,7 @@ export default function Home() {
             canvas under it to be full-bleed. */}
         <PlugSeam />
 
-        <Frame>
+        <Frame cappedBottom>
           <Section id="skills" className="border-t-0">
             <Skills />
           </Section>
@@ -56,13 +53,12 @@ export default function Home() {
             <ComponentLibrary />
           </Section> */}
 
-          <Section id="contact" bordered={false}>
-            <Contact />
-          </Section>
+          <ContactPortrait />
         </Frame>
-      </main>
 
-      <SiteFooter />
+        {/* Mirroring the opening hero, the closing copy lives beyond the rails. */}
+        <Contact />
+      </main>
     </>
   );
 }

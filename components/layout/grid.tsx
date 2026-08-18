@@ -2,6 +2,27 @@ import type { ReactNode } from "react";
 import { Plus as PlusIcon } from "reicon-react";
 
 /**
+ * ────────────────────────────────────────────────────────────────
+ *  THE GUTTER — the air the rails keep from the screen edge.
+ *
+ *  On a wide screen the column is narrower than the viewport and there is
+ *  nothing here to do. Once the viewport comes down to the column's own width
+ *  the two meet, and the rails end up drawn on the very first and last pixel
+ *  of the screen: the grid stops reading as a column with sides and starts
+ *  reading as one that has been cropped off.
+ *
+ *  So every element that draws a rail is inset by this much. It has to be
+ *  padding on a PARENT, never on the railed element itself — the rail is that
+ *  element's own border, so its own padding falls inside the line and moves
+ *  nothing.
+ *
+ *  Opting out is just not using it: the work carousel's track and the seam's
+ *  canvas both run to the screen edge on purpose, and neither draws a rail.
+ * ────────────────────────────────────────────────────────────────
+ */
+export const GUTTER = "px-3";
+
+/**
  * Small "+" drawn centred on a border intersection. Purely decorative.
  */
 export function Plus({ className = "" }: { className?: string }) {
@@ -45,13 +66,26 @@ export function CornerPluses({ bottom = true }: { bottom?: boolean }) {
 export function Frame({
   children,
   className = "",
+  capped = false,
+  cappedBottom = false,
 }: {
   children: ReactNode;
   className?: string;
+  /** Draws and rounds the frame's opening edge without changing other frames. */
+  capped?: boolean;
+  /** Draws and rounds the frame's closing edge without changing other frames. */
+  cappedBottom?: boolean;
 }) {
   return (
-    <div className="mx-auto w-full max-w-6xl border-x border-border">
-      <div className={className}>{children}</div>
+    // The outer box carries the gutter and nothing else, so the column below
+    // it keeps its exact desktop width and only starts giving ground once the
+    // viewport is narrower than the two of them together.
+    <div className={GUTTER}>
+      <div
+        className={`mx-auto w-full max-w-6xl border-x border-border ${capped ? "rounded-t-4xl border-t" : ""} ${cappedBottom ? "rounded-b-4xl border-b" : ""}`.trim()}
+      >
+        <div className={className}>{children}</div>
+      </div>
     </div>
   );
 }
