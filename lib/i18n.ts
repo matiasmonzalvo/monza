@@ -33,7 +33,7 @@ export const LANDING_COPY = {
     work: {
       heading: "Featured Work",
       description: (count: number) =>
-        `Sites, products and the systems behind them — ${count} projects shipped end to end.`,
+        `Apps, sites, products and the systems behind them. +${count} projects shipped end to end.`,
       imageAlt: (title: string) => `Screenshot of ${title}`,
     },
     formation:
@@ -110,7 +110,7 @@ export const LANDING_COPY = {
     work: {
       heading: "Proyectos destacados",
       description: (count: number) =>
-        `Sitios, productos y los sistemas que los sostienen: ${count} proyectos desarrollados de principio a fin.`,
+        `Apps, sitios, productos y los sistemas que los sostienen: +${count} proyectos desarrollados de principio a fin.`,
       imageAlt: (title: string) => `Captura de pantalla de ${title}`,
     },
     formation:

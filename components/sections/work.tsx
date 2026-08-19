@@ -292,7 +292,7 @@ export function Work({ locale = "en" }: { locale?: Locale }) {
               {copy.heading}
             </h2>
             <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
-              {copy.description(work.length)}
+              {copy.description(30)}
             </p>
           </div>
         </div>

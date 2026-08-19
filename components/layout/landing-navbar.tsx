@@ -156,7 +156,7 @@ export function LandingNavbar({
             <Link
               href={languageHref}
               aria-label={copy.languageLabel}
-              className="inline-flex h-7 shrink-0 items-center justify-center rounded-lg px-1.5 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex h-7 shrink-0 items-center justify-center rounded-lg text-[12px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
               {isSpanish ? "EN" : "ES"}
             </Link>
