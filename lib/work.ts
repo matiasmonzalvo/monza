@@ -113,7 +113,7 @@ export const WORK: WorkItem[] = [
     title: "My Outfit",
     tag: "Web app",
     description:
-      "Catalogue and dressing room on one screen — pick pieces on the left, watch them land on the model on the right.",
+      "Built My Outfit end-to-end, an AI-powered fashion product that lets users virtually try on clothing from real brands using their own photos. Integrated a custom AI try-on engine powered by Nano Banana, covering the full product experience from UX/UI to implementation.",
     image: myOutfit,
   },
   {
@@ -121,7 +121,7 @@ export const WORK: WorkItem[] = [
     title: "Hariaz",
     tag: "Landing page",
     description:
-      "Sales page for an AI-employee platform, built around a single illustrated claim and the stack it plugs into.",
+      "Designed and built Hariaz’s landing page with a strong focus on conversion, positioning, and go-to-market execution.",
     image: hariaz,
   },
   {
@@ -129,7 +129,7 @@ export const WORK: WorkItem[] = [
     title: "Centro Cortinas",
     tag: "Landing page",
     description:
-      "Service site for a curtain install-and-repair shop, anchored by a full-bleed strip of real jobs instead of stock photography.",
+      "Designed and built a conversion-focused landing page for a curtain installation and repair service.",
     image: centroCortinas,
   },
 ];
