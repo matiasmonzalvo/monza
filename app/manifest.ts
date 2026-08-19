@@ -3,7 +3,7 @@ import { SEO_COPY, SITE_NAME } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: `${SITE_NAME} — Product Designer & Design Engineer`,
+    name: `${SITE_NAME} — Design Engineer`,
     short_name: SITE_NAME,
     description: SEO_COPY.en.description,
     start_url: "/",
