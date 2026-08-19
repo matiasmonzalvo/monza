@@ -149,7 +149,7 @@ export function LandingNavbar({
               aria-expanded={open}
               aria-controls={MENU_ID}
               aria-label="Toggle menu"
-              className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground sm:hidden"
+              className="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground sm:hidden"
             >
               {/* Two bars folding into an X. `justify-between` inside a 10px
                   box leaves each bar 4px off centre — exactly the distance the
