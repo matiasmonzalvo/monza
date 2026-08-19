@@ -1,6 +1,7 @@
 import { ParticlePortrait } from "@/components/backgrounds/particle-portrait";
 import { Section } from "@/components/layout/grid";
 import { RotatingWord } from "@/components/sections/rotating-word";
+import { StarSparkle } from "reicon-react";
 
 /**
  * ────────────────────────────────────────────────────────────────
@@ -15,6 +16,12 @@ export function Hero() {
   return (
     <section id="top" className="relative">
       <div className="relative z-10 px-6 pt-24 pb-14 text-center sm:px-8 sm:py-32 lg:pt-32 lg:pb-20">
+        <div className="flex items-center justify-center gap-2 text-subtle mb-4">
+          <StarSparkle size={24} weight="Filled" strokeWidth={1.5} />
+          <span className="text-lg text-muted-foreground text-medium tracking-tight">
+            Welcome to my personal site
+          </span>
+        </div>
         <h1 className="text-center text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-[5vw] 2xl:text-[4vw]">
           Product <RotatingWord />
         </h1>
@@ -22,7 +29,7 @@ export function Hero() {
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#contact"
-            className="inline-flex h-8 items-center rounded-lg bg-primary px-5 text-sm font-medium text-white transition-all hover:opacity-80 hover:text-foreground"
+            className="inline-flex h-8 items-center rounded-lg bg-primary px-5 text-sm font-medium text-white transition-all hover:opacity-80 "
           >
             Get in touch
           </a>

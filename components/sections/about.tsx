@@ -4,7 +4,7 @@ import { RevealText } from "@/components/scroll/reveal-text";
 import { Handshake } from "reicon-react";
 
 const COPY =
-  "I'm a 22yo product designer based in Buenos Aires. I turn complex problems into clear, useful digital products, moving from early strategy to shipped details and building the systems that keep every experience coherent as it grows.";
+  "22yo design engineer based in Buenos Aires. I turn complex problems into clear, useful digital products, moving from early strategy to shipped details and building the systems that keep every experience coherent as it grows.\nThis is the tool I work with every day.";
 
 const FACTS = [
   { value: "6 years", label: "Designing products" },
@@ -15,7 +15,7 @@ const FACTS = [
 function Fact({ value, label }: (typeof FACTS)[number]) {
   return (
     <>
-      <p className="text-2xl font-normal tracking-tight text-foreground sm:text-4xl">
+      <p className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
         {value}
       </p>
       <p className="mt-2 text-sm leading-snug text-muted-foreground sm:text-lg">
@@ -47,10 +47,7 @@ export function About() {
 
       <CellGrid className="grid-cols-1 sm:grid-cols-3">
         {FACTS.map((fact) => (
-          <Cell
-            key={fact.label}
-            className="bg-linear-to-br from-background to-muted/30 px-5 py-6 sm:px-6 sm:py-8"
-          >
+          <Cell key={fact.label} className="px-6 py-6 sm:px-6 sm:py-8">
             <Fact {...fact} />
           </Cell>
         ))}

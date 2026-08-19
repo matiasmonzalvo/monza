@@ -95,7 +95,7 @@ export const WORK: WorkItem[] = [
     title: "ATP",
     tag: "Dashboard",
     description:
-      "Quoting dashboard with a side-by-side admin panel for assigning requests and tracking every quote through to close.",
+      "Transformed the company’s Excel-based workflow into a centralized import and export quoting dashboard with the full business logic built into the product. Designed the UX/UI and developed employee-focused components to streamline daily operations and reduce manual processes.",
     image: atp,
   },
 
@@ -104,7 +104,7 @@ export const WORK: WorkItem[] = [
     title: "Gecko",
     tag: "Product site",
     description:
-      "Landing and feature grid for an end-to-end medical practice platform: records, scheduling and billing in the cloud.",
+      "Performed QA and software testing for Gecko, a comprehensive clinical management platform used across critical healthcare workflows.",
     image: gecko,
   },
 

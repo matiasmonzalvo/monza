@@ -1,4 +1,4 @@
-import { ChatRoundDots, ChevronRight } from "reicon-react";
+import { ChevronRight, Plane2 } from "reicon-react";
 import { ParticlePortrait } from "@/components/backgrounds/particle-portrait";
 import { GMAIL_MARK, LINKEDIN_MARK, X_MARK } from "@/components/icons/brand";
 import { ParticleIcon } from "@/components/icons/particle-icon";
@@ -27,7 +27,10 @@ const CHANNELS = [
 
 export function Contact() {
   return (
-    <section id="contact" className="px-6 pt-12 pb-16 sm:px-8 sm:pt-14 sm:pb-20">
+    <section
+      id="contact"
+      className="px-6 pt-12 pb-16 sm:px-8 sm:pt-14 sm:pb-20"
+    >
       {/*
         Two columns from `lg` up, stacked below it. The split waits for `lg`
         rather than `md`: the channel rows carry a 64px mark plus their value,
@@ -36,7 +39,7 @@ export function Contact() {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
         <div>
           <div className="flex items-center gap-2 text-subtle mb-4">
-            <ChatRoundDots size={24} weight="Filled" strokeWidth={1.5} />
+            <Plane2 size={24} weight="Filled" strokeWidth={1.5} />
             <span className="text-lg text-muted-foreground text-medium tracking-tight">
               Get in touch
             </span>

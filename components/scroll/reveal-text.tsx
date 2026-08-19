@@ -137,15 +137,21 @@ export function RevealText({
 
   return (
     <p ref={ref} className={className}>
-      {text.split(" ").map((word, index) => (
-        // The space is a real text node between two inline-blocks, not part of
-        // the word: that is what lets the line break where it wants to. Baked
-        // into the span it would be a stretch of the word itself, and a
-        // trailing space at a line end pushes the wrap one word early.
-        <Fragment key={`${word}-${index}`}>
-          <span data-word className="inline-block">
-            {word}
-          </span>{" "}
+      {text.split("\n").map((line, lineIndex) => (
+        <Fragment key={`${line}-${lineIndex}`}>
+          {lineIndex > 0 && <br />}
+          {line.split(" ").map((word, wordIndex) => (
+            // The space is a real text node between two inline-blocks, not
+            // part of the word: that is what lets the line break where it
+            // wants to. Baked into the span it would be a stretch of the word
+            // itself, and a trailing space at a line end pushes the wrap one
+            // word early.
+            <Fragment key={`${word}-${lineIndex}-${wordIndex}`}>
+              <span data-word className="inline-block">
+                {word}
+              </span>{" "}
+            </Fragment>
+          ))}
         </Fragment>
       ))}
     </p>
