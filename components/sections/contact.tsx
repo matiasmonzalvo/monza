@@ -74,7 +74,7 @@ export function Contact() {
                   ? "noreferrer noopener"
                   : undefined
               }
-              className="group flex items-center gap-5 rounded-2xl p-5 transition-colors hover:bg-surface"
+              className="group flex items-center gap-5 rounded-2xl py-5 lg:px-5 lg:py-5 transition-colors hover:bg-surface"
             >
               <ParticleIcon mark={channel.mark} label={channel.label} />
               <span className="flex min-w-0 flex-1 items-center justify-between gap-2 text-sm text-foreground">
