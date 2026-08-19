@@ -4,6 +4,12 @@ import { Frame } from "@/components/layout/grid";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ComponentShowcase } from "@/components/library/showcase";
 import { COMPONENTS, getComponent } from "@/lib/registry";
+import {
+  createComponentJsonLd,
+  createMetaDescription,
+  createPageMetadata,
+  serializeJsonLd,
+} from "@/lib/seo";
 import { readSource } from "@/lib/source";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -16,12 +22,22 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const meta = getComponent(slug);
 
-  if (!meta) return { title: "Not found — Monza" };
+  if (!meta) {
+    return {
+      title: "Component not found",
+      robots: { index: false, follow: false },
+    };
+  }
 
-  return {
-    title: `${meta.name} — Monza`,
-    description: meta.description,
-  };
+  const description = createMetaDescription(meta.description);
+
+  return createPageMetadata({
+    title: `${meta.name} UI Component — React & TypeScript`,
+    description,
+    path: `/components/${meta.slug}`,
+    alternatePath: `/es/components/${meta.slug}`,
+    locale: "en",
+  });
 }
 
 export default async function ComponentPage({ params }: Params) {
@@ -39,10 +55,20 @@ export default async function ComponentPage({ params }: Params) {
       source: await readSource(path),
     })),
   );
+  const jsonLd = createComponentJsonLd({
+    name: meta.name,
+    description: meta.description,
+    slug: meta.slug,
+    locale: "en",
+  });
 
   return (
     <>
-      <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
+      <main lang="en" className="flex-1">
         <Frame>
           {/* Heading, preview and code all hang off the selected version, so
               they travel together as one client component. */}

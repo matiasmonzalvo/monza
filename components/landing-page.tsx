@@ -10,7 +10,7 @@ import type { Locale } from "@/lib/i18n";
 
 export function LandingPage({ locale }: { locale: Locale }) {
   return (
-    <main className="flex-1">
+    <main lang={locale} className="flex-1">
       {/* The opening copy stays outside the page grid. Its rails begin with
           the portrait and continue through About as one opening sequence. */}
       <Hero locale={locale} />

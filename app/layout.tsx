@@ -3,6 +3,14 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { LandingNavbar } from "@/components/layout/landing-navbar";
 import { SmoothScroll } from "@/components/scroll/smooth-scroll";
+import {
+  SEO_COPY,
+  SITE_ALIAS,
+  SITE_NAME,
+  SITE_URL,
+  serializeJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,9 +19,56 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Monza — Product Designer",
-  description:
-    "Product designer building clear, systematic interfaces. Portfolio and UI component library.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SEO_COPY.en.title,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SEO_COPY.en.description,
+  applicationName: `${SITE_NAME} Portfolio`,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  keywords: [
+    SITE_NAME,
+    SITE_ALIAS,
+    "product designer",
+    "design engineer",
+    "UX/UI designer",
+    "digital product design",
+    "design systems",
+    "web development",
+    "Buenos Aires product designer",
+  ],
+  category: "technology",
+  referrer: "origin-when-cross-origin",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   other: {
     google: "notranslate",
   },
@@ -79,6 +134,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} antialiased dark notranslate`}
     >
       <body className="bg-background text-foreground">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
+        />
         <Script id="theme-init" strategy="beforeInteractive">
           {themeScript}
         </Script>
