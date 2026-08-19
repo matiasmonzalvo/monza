@@ -13,6 +13,7 @@ import {
 } from "reicon-react";
 import { TECH, TechIcon, type TechName } from "@/components/icons/tech";
 import { DeviceMirror } from "@/components/sections/device-mirror";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 
 /**
  * ────────────────────────────────────────────────────────────────
@@ -416,11 +417,23 @@ function bead(travel: number) {
   } as CSSProperties;
 }
 
-function AiFirst() {
+function AiFirst({ locale }: { locale: Locale }) {
+  const label = LANDING_COPY[locale].visuals.aiLabel;
+
   return (
     <>
-      <AiScene layout={scene(NARROW)} id="ai-narrow" className="md:hidden" />
-      <AiScene layout={scene(AI)} id="ai-wide" className="hidden md:block" />
+      <AiScene
+        layout={scene(NARROW)}
+        id="ai-narrow"
+        className="md:hidden"
+        label={label}
+      />
+      <AiScene
+        layout={scene(AI)}
+        id="ai-wide"
+        className="hidden md:block"
+        label={label}
+      />
     </>
   );
 }
@@ -429,6 +442,7 @@ function AiScene({
   layout: s,
   id,
   className,
+  label,
 }: {
   layout: Scene;
   /**
@@ -440,6 +454,7 @@ function AiScene({
    */
   id: string;
   className: string;
+  label: string;
 }) {
   const rows = [s.midY - s.spread, s.midY, s.midY + s.spread];
 
@@ -449,7 +464,7 @@ function AiScene({
     // the same width or the two come apart.
     <div style={{ width: FILL }} className={`relative mx-auto ${className}`}>
       <Board
-        label="Claude Code, Codex and Cursor feeding into one pair of hands, and one result out the far side"
+        label={label}
         width={s.width}
         height={s.height}
       >
@@ -773,7 +788,9 @@ const APPROACH = 0.75;
  */
 const MOBILE_X_SPREAD = 0.65;
 
-function Education() {
+function Education({ locale }: { locale: Locale }) {
+  const labels = LANDING_COPY[locale].visuals.education;
+
   return (
     // `mask-edges` on all four sides, not just the two the marquee needs: these
     // arrive from every direction, so every edge is one something crosses.
@@ -785,12 +802,13 @@ function Education() {
         <Portrait className="relative" style={{ width: 84 }} />
       </div>
 
-      {ARRIVALS.map((arrival) => {
+      {ARRIVALS.map((arrival, index) => {
         const mobileX = Math.round(arrival.x * MOBILE_X_SPREAD);
+        const label = labels[index];
 
         return (
           <div
-            key={arrival.label}
+            key={label}
             style={
               {
                 left: "calc(50% + var(--arrival-x))",
@@ -823,7 +841,7 @@ function Education() {
                 className="shrink-0 text-foreground"
               />
               <span className="text-[12px] font-medium tracking-tight text-foreground">
-                {arrival.label}
+                {label}
               </span>
             </div>
           </div>
@@ -861,8 +879,8 @@ function UxUi() {
  *
  *  A marquee rather than a grid because a grid of logos is a claim to be
  *  complete, and this is not a complete list — it is a sample that keeps
- *  going. Three rows, the middle one against the other two, at three
- *  durations that do not divide into each other, so the rows never line up
+ *  going. Four rows, alternating direction, at four durations that do not
+ *  divide into each other, so the rows never line up
  *  into one block sliding sideways.
  *
  *  Two things this only works because of: the list in each row is rendered
@@ -887,6 +905,11 @@ const ROWS: { items: TechName[]; seconds: number; reverse: boolean }[] = [
     items: ["reactNative", "expo", "supabase", "postgres", "vercel"],
     seconds: 51,
     reverse: false,
+  },
+  {
+    items: ["cursor", "codex", "claude", "grok", "antigravity"],
+    seconds: 41,
+    reverse: true,
   },
 ];
 
@@ -941,12 +964,18 @@ function Stack() {
  * one case per entry, and an unmatched slug returns nothing rather than
  * throwing — a cell with no drawing yet is a gap, not a broken page.
  */
-export function SkillVisual({ slug }: { slug: string }) {
+export function SkillVisual({
+  slug,
+  locale = "en",
+}: {
+  slug: string;
+  locale?: Locale;
+}) {
   switch (slug) {
     case "ai-first":
-      return <AiFirst />;
+      return <AiFirst locale={locale} />;
     case "education":
-      return <Education />;
+      return <Education locale={locale} />;
     case "ux-ui":
       return <UxUi />;
     case "stack":

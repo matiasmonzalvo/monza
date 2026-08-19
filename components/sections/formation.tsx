@@ -1,5 +1,5 @@
-import { Eyebrow } from "@/components/layout/grid";
 import { RevealText } from "@/components/scroll/reveal-text";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 
 /**
  * ────────────────────────────────────────────────────────────────
@@ -12,10 +12,7 @@ import { RevealText } from "@/components/scroll/reveal-text";
  *  big it is set.
  * ────────────────────────────────────────────────────────────────
  */
-const COPY =
-  "None of it was luck. Every screen up there is the sum of what I studied, practised and rebuilt until it held — the training that turns a blank file into a system, and a system into something worth shipping.";
-
-export function Formation() {
+export function Formation({ locale = "en" }: { locale?: Locale }) {
   return (
     <div className="px-6 py-24 sm:px-8 md:py-36">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center sm:gap-10">
@@ -23,7 +20,7 @@ export function Formation() {
             as one gesture crossing the block only while the lines are close
             enough together to be taken in at once. */}
         <RevealText
-          text={COPY}
+          text={LANDING_COPY[locale].formation}
           className="text-balance text-2xl font-medium leading-[1.28] tracking-tight text-foreground sm:text-3xl md:text-4xl md:leading-[1.25]"
         />
       </div>

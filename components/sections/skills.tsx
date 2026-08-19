@@ -6,7 +6,8 @@ import {
 } from "reicon-react";
 import { Cell, CellGrid, Eyebrow, Plus } from "@/components/layout/grid";
 import { SkillVisual } from "@/components/sections/skill-visuals";
-import { SKILLS } from "@/lib/skills";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
+import { getSkills } from "@/lib/skills";
 
 /**
  * ────────────────────────────────────────────────────────────────
@@ -44,7 +45,10 @@ const MARKS = {
   stack: StackPerspective,
 };
 
-export function Skills() {
+export function Skills({ locale = "en" }: { locale?: Locale }) {
+  const copy = LANDING_COPY[locale].skills;
+  const skills = getSkills(locale);
+
   return (
     <>
       {/* The title band, unchanged. This is the face the seam plugs into, so
@@ -52,16 +56,15 @@ export function Skills() {
           opening on the page uses. */}
       <div className="flex flex-col items-center gap-4 px-6 pb-20 pt-12 text-center sm:px-8 md:pt-12 md:pb-32">
         <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
-          Skills & Experience
+          {copy.heading}
         </h2>
         <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
-          The tools, the languages and the systems behind everything above — and
-          the years that put them there.
+          {copy.description}
         </p>
       </div>
 
       <CellGrid className="grid-cols-1 md:grid-cols-2">
-        {SKILLS.map((skill, index) => {
+        {skills.map((skill, index) => {
           const Mark = MARKS[skill.slug as keyof typeof MARKS];
           return (
             <Cell key={skill.slug} className="flex flex-col">
@@ -114,7 +117,7 @@ export function Skills() {
                   `pb-` is the one exception: a drawing flush against the
                   closing rule reads as running out of room. */}
               <div className="flex min-h-[300px] flex-1 items-center justify-center overflow-hidden pb-10">
-                <SkillVisual slug={skill.slug} />
+                <SkillVisual slug={skill.slug} locale={locale} />
               </div>
             </Cell>
           );

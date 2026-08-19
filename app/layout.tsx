@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Monza — Product Designer",
   description:
     "Product designer building clear, systematic interfaces. Portfolio and UI component library.",
+  other: {
+    google: "notranslate",
+  },
 };
 
 /**
@@ -57,16 +60,30 @@ const themeScript = `
 })();
 `;
 
+/** Keeps the document language aligned with the explicit /es route. */
+const localeScript = `
+(function () {
+  var path = window.location.pathname;
+  document.documentElement.lang = path === '/es' || path.indexOf('/es/') === 0
+    ? 'es'
+    : 'en';
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      translate="no"
       suppressHydrationWarning
-      className={`${inter.variable} antialiased dark`}
+      className={`${inter.variable} antialiased dark notranslate`}
     >
       <body className="bg-background text-foreground">
         <Script id="theme-init" strategy="beforeInteractive">
           {themeScript}
+        </Script>
+        <Script id="locale-init" strategy="beforeInteractive">
+          {localeScript}
         </Script>
 
         {/* Lives out here, not in the pages, because the smooth wrapper

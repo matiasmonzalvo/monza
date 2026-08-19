@@ -146,11 +146,15 @@ const ITEMS: {
 export function Dropdown({
   version = "border",
   label = "Account",
+  optionsLabel,
+  itemLabels,
   onAction,
   className,
 }: {
   version?: DropdownVersion;
   label?: string;
+  optionsLabel?: string;
+  itemLabels?: Partial<Record<DropdownAction, string>>;
   onAction?: (action: DropdownAction) => void;
   className?: string;
 }) {
@@ -460,7 +464,7 @@ export function Dropdown({
           ref={panelRef}
           id={contentId}
           role="menu"
-          aria-label={`${label} options`}
+          aria-label={optionsLabel ?? `${label} options`}
           className={cn("flex flex-col gap-1 transition-transform", GROW)}
           style={{
             padding: PANEL_PAD,
@@ -496,7 +500,7 @@ export function Dropdown({
                 aria-hidden="true"
                 className="shrink-0"
               />
-              {item}
+              {itemLabels?.[value] ?? item}
             </button>
           ))}
         </div>

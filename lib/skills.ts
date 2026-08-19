@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n";
+
 /**
  * The four cells of the skills grid, in reading order — top-left, top-right,
  * bottom-left, bottom-right.
@@ -24,30 +26,69 @@ export type SkillItem = {
 export const SKILLS: SkillItem[] = [
   {
     slug: "ai-first",
-    title: "Built with models, not around them",
+    title: "I use AI as part of my day-to-day work",
     tag: "AI-first",
     description:
-      "A method rather than a habit — context and constraints set before the first line, the work split across tools that each do one thing well, and every pass reviewed before it counts as done.",
+      "I move between several tools depending on the task, give them context and constraints, and review what they produce before using it.",
   },
   {
     slug: "education",
-    title: "Everything arrives at the same place",
+    title: "I'm in the final year of my university degree",
     tag: "Education",
     description:
-      "The degree in its final year, a Cambridge C1, a podium at a Siemens hackathon, courses, side projects, and years on the phone with real customers. None of it was one path.",
+      "I have also learned through a Cambridge C1, hackathons, courses, side projects, sales, and years of customer support. Each experience has given me a different way to approach the work.",
   },
   {
     slug: "ux-ui",
-    title: "Decisions you can measure",
+    title: "I like making interfaces clear and consistent",
     tag: "UX / UI",
     description:
-      "Interfaces designed on a system rather than by eye: one spacing scale, one type ramp, states drawn before they are needed, and every screen answering what the person is meant to do next.",
+      "I use simple systems for spacing, type, and states, and I try to make every screen easy to understand and use on any screen or device.",
   },
   {
     slug: "stack",
-    title: "The tools it gets built in",
+    title: "I use different tools for different kinds of work",
     tag: "Stack",
     description:
-      "Design and engineering on the same set of hands — from the file the idea is drawn in to the app store build and the database behind it.",
+      "My day-to-day moves from design and front-end code to databases, deployment, and AI tools, depending on what the task needs.",
   },
 ];
+
+const SKILLS_ES_COPY: Record<
+  SkillItem["slug"],
+  Pick<SkillItem, "title" | "tag" | "description">
+> = {
+  "ai-first": {
+    title: "Uso la IA como parte de mi trabajo diario",
+    tag: "IA primero",
+    description:
+      "Elijo entre distintas herramientas según la tarea, les doy contexto y restricciones, y reviso lo que producen antes de usarlo.",
+  },
+  education: {
+    title: "Estoy en el último año de mi carrera universitaria",
+    tag: "Formación",
+    description:
+      "También aprendí mediante un Cambridge C1, hackatones, cursos, proyectos propios, ventas y años de atención al cliente. Cada experiencia me dio una manera diferente de abordar el trabajo.",
+  },
+  "ux-ui": {
+    title: "Me gusta crear interfaces claras y consistentes",
+    tag: "UX / UI",
+    description:
+      "Uso sistemas simples para el espaciado, la tipografía y los estados, y busco que cada pantalla sea fácil de entender y usar en cualquier dispositivo.",
+  },
+  stack: {
+    title: "Uso distintas herramientas para cada tipo de trabajo",
+    tag: "Tecnologías",
+    description:
+      "Mi día a día abarca desde el diseño y el código front-end hasta bases de datos, despliegues y herramientas de IA, según lo que necesite cada tarea.",
+  },
+};
+
+export function getSkills(locale: Locale): SkillItem[] {
+  if (locale === "en") return SKILLS;
+
+  return SKILLS.map((skill) => ({
+    ...skill,
+    ...SKILLS_ES_COPY[skill.slug],
+  }));
+}

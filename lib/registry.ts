@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n";
+
 /**
  * Plain data only — this module is imported by Server Components, so it must
  * not pull in any client component.
@@ -66,6 +68,7 @@ export const COMPONENTS: ComponentMeta[] = [
     dependencies: [
       "components/theme/theme-toggle.tsx",
       "lib/theme.ts",
+      "lib/i18n.ts",
       "lib/cn.ts",
     ],
     defaultVersion: "solid",
@@ -222,8 +225,136 @@ export const COMPONENTS: ComponentMeta[] = [
   },
 ];
 
-export function getComponent(slug: string): ComponentMeta | undefined {
-  return COMPONENTS.find((component) => component.slug === slug);
+const COMPONENTS_ES: Record<
+  string,
+  Pick<ComponentMeta, "description"> & {
+    versions: Record<string, Pick<VersionMeta, "label" | "description">>;
+  }
+> = {
+  navbar: {
+    description:
+      "Una isla de navegación suspendida del borde superior, al que se une mediante esquinas cóncavas. La silueta es idéntica en todas las versiones; solo cambia el relleno.",
+    versions: {
+      border: {
+        label: "Borde",
+        description:
+          "Fondo opaco con un borde fino que recorre toda la silueta, incluidas las esquinas cóncavas.",
+      },
+      solid: {
+        label: "Sólido",
+        description: "Superficie rellena, sin borde.",
+      },
+      blur: {
+        label: "Desenfoque",
+        description:
+          "Fondo translúcido sobre una superficie desenfocada que deja entrever el fondo.",
+      },
+    },
+  },
+  notification: {
+    description:
+      "Una notificación inspirada en iOS con imagen de la aplicación, título, mensaje y hora de entrega.",
+    versions: {
+      border: {
+        label: "Borde",
+        description: "Fondo opaco con un borde fino y sutil.",
+      },
+      solid: {
+        label: "Sólido",
+        description: "Una superficie suavemente rellena sin contorno visible.",
+      },
+      blur: {
+        label: "Desenfoque",
+        description:
+          "Una superficie translúcida que desenfoca y satura el fondo que tiene detrás.",
+      },
+    },
+  },
+  dropdown: {
+    description:
+      "Al abrirse, el panel no flota debajo del disparador: crece desde él y se extiende más allá de su borde derecho como un solo cuerpo. La esquina que une el lateral del disparador con la parte superior del panel es cóncava; todas las demás tienen un radio convencional.",
+    versions: {
+      border: {
+        label: "Borde",
+        description: "Disparador y menú delineados sobre una superficie opaca.",
+      },
+      solid: {
+        label: "Sólido",
+        description: "Disparador y menú rellenos con alto contraste.",
+      },
+    },
+  },
+  select: {
+    description:
+      "La silueta del menú desplegable con una selección detrás. Al abrirse, la lista crece desde el disparador como un solo cuerpo y muestra allí la opción actual. La esquina que une el lateral del disparador con la parte superior del panel es cóncava; todas las demás tienen un radio convencional.",
+    versions: {
+      border: {
+        label: "Borde",
+        description: "Disparador y lista delineados sobre una superficie opaca.",
+      },
+      solid: {
+        label: "Sólido",
+        description: "Disparador y lista rellenos con alto contraste.",
+      },
+    },
+  },
+  input: {
+    description:
+      "La silueta de las pestañas aplicada a un campo de texto. Un campo aislado no genera una esquina cóncava: es una sola caja con todas las esquinas hacia afuera. La placa del ícono la crea al ubicarse arriba a la izquierda y ser más angosta que el cuerpo; así deja el borde izquierdo recto y coloca la única esquina interior a su derecha.",
+    versions: {
+      border: {
+        label: "Borde",
+        description:
+          "Cuerpo opaco con un borde fino que recorre toda la silueta, incluido el arco cóncavo.",
+      },
+      solid: {
+        label: "Sólido",
+        description:
+          "Cuerpo relleno sin borde; al enfocarlo, el campo queda recortado con el color del fondo.",
+      },
+    },
+  },
+  tabs: {
+    description:
+      "Una barra aislada no genera una esquina cóncava: es una sola caja con todas las esquinas hacia afuera. El título la crea al ubicarse arriba a la izquierda y ser más angosto que la barra. El indicador se desliza entre pestañas y se estira durante el recorrido, mientras las demás etiquetas se desenfocan con el movimiento.",
+    versions: {
+      border: {
+        label: "Borde",
+        description:
+          "Cuerpo opaco con un borde fino que recorre toda la silueta, incluidos los arcos cóncavos.",
+      },
+      solid: {
+        label: "Sólido",
+        description:
+          "Cuerpo relleno sin borde; el indicador queda recortado con el color del fondo.",
+      },
+      blur: {
+        label: "Desenfoque",
+        description:
+          "Cuerpo translúcido sobre un fondo desenfocado que deja entrever la superficie posterior.",
+      },
+    },
+  },
+};
+
+export function getComponent(
+  slug: string,
+  locale: Locale = "en",
+): ComponentMeta | undefined {
+  const component = COMPONENTS.find((entry) => entry.slug === slug);
+  if (!component || locale === "en") return component;
+
+  const translation = COMPONENTS_ES[slug];
+  if (!translation) return component;
+
+  return {
+    ...component,
+    description: translation.description,
+    versions: component.versions.map((version) => ({
+      ...version,
+      ...translation.versions[version.id],
+    })),
+  };
 }
 
 /**

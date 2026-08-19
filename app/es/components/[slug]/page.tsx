@@ -14,9 +14,9 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const meta = getComponent(slug);
+  const meta = getComponent(slug, "es");
 
-  if (!meta) return { title: "Not found — Monza" };
+  if (!meta) return { title: "No encontrado — Monza" };
 
   return {
     title: `${meta.name} — Monza`,
@@ -24,15 +24,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function ComponentPage({ params }: Params) {
+export default async function SpanishComponentPage({ params }: Params) {
   const { slug } = await params;
-  const meta = getComponent(slug);
+  const meta = getComponent(slug, "es");
 
   if (!meta) notFound();
 
   const source = await readSource(meta.sourcePath);
-  // Read alongside the source so the page ships everything the component
-  // needs, not just the file that carries its name.
   const dependencies = await Promise.all(
     (meta.dependencies ?? []).map(async (path) => ({
       path,
@@ -44,18 +42,16 @@ export default async function ComponentPage({ params }: Params) {
     <>
       <main className="flex-1">
         <Frame>
-          {/* Heading, preview and code all hang off the selected version, so
-              they travel together as one client component. */}
           <ComponentShowcase
             meta={meta}
             source={source}
             dependencies={dependencies}
-            locale="en"
+            locale="es"
           />
         </Frame>
       </main>
 
-      <SiteFooter locale="en" />
+      <SiteFooter locale="es" />
     </>
   );
 }

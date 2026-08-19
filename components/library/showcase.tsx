@@ -10,6 +10,7 @@ import {
   previewWidth,
 } from "@/components/library/preview";
 import { cn } from "@/lib/cn";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 import { type ComponentMeta, defaultVersion } from "@/lib/registry";
 
 export type DependencySource = {
@@ -27,11 +28,14 @@ export function ComponentShowcase({
   meta,
   source,
   dependencies = [],
+  locale = "en",
 }: {
   meta: ComponentMeta;
   source: string;
   dependencies?: DependencySource[];
+  locale?: Locale;
 }) {
+  const copy = LANDING_COPY[locale].componentShowcase;
   const [version, setVersion] = useState(defaultVersion(meta));
   const current =
     meta.versions.find((entry) => entry.id === version) ?? meta.versions[0];
@@ -61,7 +65,7 @@ export function ComponentShowcase({
             under it, not just the preview box. */}
         <div
           role="group"
-          aria-label="Component version"
+          aria-label={copy.versionLabel}
           className="mt-6 flex flex-wrap gap-1.5"
         >
           {meta.versions.map((entry) => {
@@ -90,7 +94,7 @@ export function ComponentShowcase({
       <Section bordered={false}>
         <div className="border-b border-border px-5 py-4 sm:px-6">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-            Preview
+            {copy.preview}
           </span>
         </div>
 
@@ -108,7 +112,11 @@ export function ComponentShowcase({
 
             {/* The navbar pins itself to this box, so it has to be positioned. */}
             <div className={cn("relative z-10", previewWidth(meta.slug))}>
-              <ComponentPreview slug={meta.slug} version={version} />
+              <ComponentPreview
+                slug={meta.slug}
+                version={version}
+                locale={locale}
+              />
             </div>
           </div>
         </div>
@@ -125,7 +133,7 @@ export function ComponentShowcase({
 
         {/* Usage */}
         <div className="border-b border-border">
-          <CodeBlock code={usage} filename="Usage" />
+          <CodeBlock code={usage} filename={copy.usage} locale={locale} />
         </div>
 
         {/* Full source */}
@@ -133,6 +141,7 @@ export function ComponentShowcase({
           code={source}
           filename={filename}
           maxHeight="560px"
+          locale={locale}
           className={dependencies.length > 0 ? "border-b border-border" : ""}
         />
 
@@ -143,11 +152,10 @@ export function ComponentShowcase({
           <>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border px-5 py-4 sm:px-6">
               <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-                Dependencies
+                {copy.dependencies}
               </span>
               <span className="text-[13px] text-muted-foreground">
-                {meta.name} imports these from the project. Copy them across
-                too if you have no equivalent.
+                {copy.dependencyDescription(meta.name)}
               </span>
             </div>
 
@@ -158,6 +166,7 @@ export function ComponentShowcase({
                 filename={dependency.path}
                 language={languageFor(dependency.path)}
                 maxHeight="360px"
+                locale={locale}
                 className={
                   index < dependencies.length - 1
                     ? "border-b border-border"

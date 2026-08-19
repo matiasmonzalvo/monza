@@ -10,6 +10,7 @@ import {
 import { Select, type SelectVersion } from "@/components/library/select";
 import { Tabs, type TabsVersion } from "@/components/library/tabs";
 import { cn } from "@/lib/cn";
+import type { Locale } from "@/lib/i18n";
 
 /**
  * Renders a library component by slug. One case per component — the only
@@ -19,12 +20,16 @@ export function ComponentPreview({
   slug,
   version,
   compact = false,
+  locale = "en",
 }: {
   slug: string;
   version: string;
   /** Set on the gallery cards, where there is a third of a page to work with. */
   compact?: boolean;
+  locale?: Locale;
 }) {
+  const spanish = locale === "es";
+
   switch (slug) {
     case "navbar":
       // `absolute` keeps the bar pinned to the preview box rather than to the
@@ -34,18 +39,93 @@ export function ComponentPreview({
           version={version as NavbarVersion}
           position="absolute"
           layout={compact ? "mobile" : "responsive"}
+          locale={locale}
+          labels={
+            spanish
+              ? {
+                  nav: ["Proyectos", "Componentes", "Contacto"],
+                  contact: "Contacto",
+                  getInTouch: "Contactame",
+                  browse: "Ver componentes",
+                  mainLabel: "Navegación principal",
+                  menuLabel: "Abrir o cerrar el menú",
+                }
+              : undefined
+          }
         />
       );
     case "notification":
-      return <Notification version={version as NotificationVersion} />;
+      return (
+        <Notification
+          version={version as NotificationVersion}
+          title={spanish ? "¡Solo por hoy!" : undefined}
+          description={
+            spanish
+              ? "Disfrutá una oferta exclusiva en tu café favorito. ¡No te la pierdas!"
+              : undefined
+          }
+          sentAt={spanish ? "ahora" : undefined}
+        />
+      );
     case "dropdown":
-      return <Dropdown version={version as DropdownVersion} />;
+      return (
+        <Dropdown
+          version={version as DropdownVersion}
+          label={spanish ? "Cuenta" : undefined}
+          optionsLabel={spanish ? "Opciones de la cuenta" : undefined}
+          itemLabels={
+            spanish
+              ? {
+                  profile: "Perfil",
+                  settings: "Configuración",
+                  billing: "Facturación",
+                  "sign-out": "Cerrar sesión",
+                }
+              : undefined
+          }
+        />
+      );
     case "select":
-      return <Select version={version as SelectVersion} />;
+      return (
+        <Select
+          version={version as SelectVersion}
+          label={spanish ? "Plan" : undefined}
+          placeholder={spanish ? "Elegí un plan" : undefined}
+          options={
+            spanish
+              ? [
+                  { value: "starter", label: "Inicial" },
+                  { value: "pro", label: "Pro" },
+                  { value: "enterprise", label: "Empresas" },
+                ]
+              : undefined
+          }
+        />
+      );
     case "input":
-      return <Input version={version as InputVersion} />;
+      return (
+        <Input
+          version={version as InputVersion}
+          label={spanish ? "Correo electrónico" : undefined}
+          placeholder={spanish ? "vos@ejemplo.com" : undefined}
+        />
+      );
     case "tabs":
-      return <Tabs version={version as TabsVersion} />;
+      return (
+        <Tabs
+          version={version as TabsVersion}
+          label={spanish ? "Secciones" : undefined}
+          items={
+            spanish
+              ? [
+                  { value: "overview", label: "Resumen" },
+                  { value: "activity", label: "Actividad" },
+                  { value: "settings", label: "Ajustes" },
+                ]
+              : undefined
+          }
+        />
+      );
     default:
       return null;
   }

@@ -1,6 +1,7 @@
 import { ParticlePortrait } from "@/components/backgrounds/particle-portrait";
 import { Section } from "@/components/layout/grid";
 import { RotatingWord } from "@/components/sections/rotating-word";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 import { StarSparkle } from "reicon-react";
 
 /**
@@ -12,18 +13,22 @@ import { StarSparkle } from "reicon-react";
  *  framed sections below it.
  * ────────────────────────────────────────────────────────────────
  */
-export function Hero() {
+export function Hero({ locale = "en" }: { locale?: Locale }) {
+  const copy = LANDING_COPY[locale].hero;
+
   return (
     <section id="top" className="relative">
       <div className="relative z-10 px-6 pt-24 pb-14 text-center sm:px-8 sm:py-32 lg:pt-32 lg:pb-20">
         <div className="flex items-center justify-center gap-2 text-subtle mb-4">
           <StarSparkle size={24} weight="Filled" strokeWidth={1.5} />
           <span className="text-lg text-muted-foreground text-medium tracking-tight">
-            Welcome to my personal site
+            {copy.welcome}
           </span>
         </div>
         <h1 className="text-center text-6xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-[5vw] 2xl:text-[4vw]">
-          Product <RotatingWord />
+          {copy.productPrefix ? `${copy.productPrefix} ` : null}
+          <RotatingWord locale={locale} />
+          {copy.productSuffix}
         </h1>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -31,13 +36,13 @@ export function Hero() {
             href="#contact"
             className="inline-flex h-8 items-center rounded-lg bg-primary px-5 text-sm font-medium text-white transition-all hover:opacity-80 "
           >
-            Get in touch
+            {copy.contact}
           </a>
           <a
             href="#work"
             className="inline-flex h-8 items-center rounded-lg bg-muted/50 px-3.5 text-sm font-medium text-foreground backdrop-blur-sm transition-all hover:bg-muted"
           >
-            Featured Work
+            {copy.work}
           </a>
         </div>
       </div>

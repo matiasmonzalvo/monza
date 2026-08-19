@@ -1,11 +1,13 @@
 import type { ReactNode, SVGProps } from "react";
 import {
+  GoogleAntigravity,
   ClaudeCode,
   CodexOpenai,
   Cursor,
   Expo,
   Figma,
   Framer,
+  GrokXai,
   Illustrator,
   Nextdotjs,
   Nodedotjs,
@@ -27,7 +29,7 @@ import {
  *  `@thesvg/react` proper, not paths copied out of it: every mark below is the
  *  brand's own artwork, in colour, kept current by `npm update` rather than by
  *  someone noticing a redraw has gone stale. They render as Server Components
- *  and the package tree-shakes, so the eighteen imported here are the eighteen
+ *  and the package tree-shakes, so the twenty imported here are the twenty
  *  that ship.
  *
  *  ────────────────────────────────────────────────────────────────
@@ -36,7 +38,7 @@ import {
  *  Because they have no colour. Vercel, Next.js, Framer, Cursor, Codex and
  *  Expo are monochrome marks by brand — theSVG ships their `default` as a hard
  *  #fff or a near-black #000020, which is a logo that disappears into exactly
- *  one of this site's two themes. For those six the `mono` variant is the
+ *  one of this site's two themes. For those seven the `mono` variant is the
  *  faithful rendering, not a downgrade: it draws in `currentColor`, so the
  *  mark is black on the light theme and white on the dark one, which is what
  *  the brand guidelines ask for anyway.
@@ -80,6 +82,14 @@ export const TECH = {
   cursor: {
     label: "Cursor",
     mark: (p: MarkProps) => <Cursor variant="mono" {...p} />,
+  },
+  grok: {
+    label: "Grok",
+    mark: (p: MarkProps) => <GrokXai variant="mono" {...p} />,
+  },
+  antigravity: {
+    label: "Antigravity",
+    mark: (p: MarkProps) => <GoogleAntigravity {...p} />,
   },
 
   // Code.

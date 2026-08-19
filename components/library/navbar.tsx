@@ -54,12 +54,23 @@ const STYLES = {
 
 const NAV = ["Work", "Components", "Contact"];
 
+const DEFAULT_LABELS = {
+  nav: NAV,
+  contact: "Contact",
+  getInTouch: "Get in touch",
+  browse: "Browse components",
+  mainLabel: "Main",
+  menuLabel: "Toggle menu",
+};
+
 const MENU_ID = "library-navbar-menu";
 
 export function Navbar({
   version = "border",
   position = "fixed",
   layout = "responsive",
+  locale = "en",
+  labels = DEFAULT_LABELS,
   className,
 }: {
   version?: NavbarVersion;
@@ -73,6 +84,15 @@ export function Navbar({
    * action, menu button — for places too narrow to earn the full layout.
    */
   layout?: "responsive" | "mobile";
+  locale?: "en" | "es";
+  labels?: {
+    nav: readonly string[];
+    contact: string;
+    getInTouch: string;
+    browse: string;
+    mainLabel: string;
+    menuLabel: string;
+  };
   className?: string;
 }) {
   const s = STYLES[version];
@@ -124,7 +144,7 @@ export function Navbar({
 
         {/* Content sits above the shape. */}
         <nav
-          aria-label="Main"
+          aria-label={labels.mainLabel}
           className="relative flex h-14 items-center gap-3 px-4 sm:gap-6"
         >
           <a
@@ -138,7 +158,7 @@ export function Navbar({
           </a>
 
           <ul className={cn("hidden items-center gap-1", !tight && "sm:flex")}>
-            {NAV.map((link) => (
+            {labels.nav.map((link) => (
               <li key={link}>
                 <a
                   href="#"
@@ -158,24 +178,24 @@ export function Navbar({
                 onClick={hold}
                 className="inline-flex h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80"
               >
-                Contact
+                {labels.contact}
               </a>
             ) : (
               <>
-                <ThemeToggle />
+                <ThemeToggle locale={locale} />
                 <a
                   href="#"
                   onClick={hold}
                   className="hidden h-7 shrink-0 items-center rounded-lg bg-muted px-3.5 text-[13px] font-semibold tracking-tight text-foreground transition-opacity hover:opacity-80 hover:text-foreground sm:inline-flex"
                 >
-                  Get in touch
+                  {labels.getInTouch}
                 </a>
                 <a
                   href="#"
                   onClick={hold}
                   className="hidden h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80 hover:text-foreground sm:inline-flex"
                 >
-                  Browse components
+                  {labels.browse}
                 </a>
               </>
             )}
@@ -185,7 +205,7 @@ export function Navbar({
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls={MENU_ID}
-              aria-label="Toggle menu"
+              aria-label={labels.menuLabel}
               className={cn(
                 "inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground",
                 !tight && "sm:hidden",
@@ -230,7 +250,7 @@ export function Navbar({
         >
           <div className="overflow-hidden px-4">
             <ul className="space-y-0.5 border-t border-border pt-2 pb-3">
-              {NAV.map((link, index) => (
+              {labels.nav.map((link, index) => (
                 <li
                   key={link}
                   className={cn(

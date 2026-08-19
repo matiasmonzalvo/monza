@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/cn";
+import { LANDING_COPY } from "@/lib/i18n";
 
 export type NavbarVersion = "border" | "solid" | "blur";
 
@@ -53,12 +55,6 @@ const STYLES = {
   },
 } satisfies Record<NavbarVersion, Record<string, string>>;
 
-const NAV = [
-  { label: "About", href: "/#about" },
-  { label: "Work", href: "/#work" },
-  { label: "Skills", href: "/#skills" },
-];
-
 const MENU_ID = "landing-navbar-menu";
 
 export function LandingNavbar({
@@ -70,6 +66,25 @@ export function LandingNavbar({
 }) {
   const s = STYLES[version];
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isSpanish = pathname === "/es" || pathname.startsWith("/es/");
+  const locale = isSpanish ? "es" : "en";
+  const copy = LANDING_COPY[locale].nav;
+  const homeHref = isSpanish ? "/es" : "/";
+  const nav = [
+    { label: copy.about, href: `${homeHref}#about` },
+    { label: copy.work, href: `${homeHref}#work` },
+    { label: copy.skills, href: `${homeHref}#skills` },
+  ];
+  const languageHref = isSpanish
+    ? pathname.replace(/^\/es(?=\/|$)/, "") || "/"
+    : pathname === "/"
+      ? "/es"
+      : `/es${pathname}`;
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   return (
     <div
@@ -111,18 +126,21 @@ export function LandingNavbar({
 
         {/* Content sits above the shape. */}
         <nav
-          aria-label="Main"
+          aria-label={copy.mainLabel}
           data-landing-navbar
           className="relative flex h-14 items-center gap-3 px-4 sm:gap-6"
         >
-          <Link href="/#top" className="flex shrink-0 items-center gap-2.5">
+          <Link
+            href={`${homeHref}#top`}
+            className="flex shrink-0 items-center gap-2.5"
+          >
             <span className="text-xl font-medium tracking-tight text-foreground">
               Monza<span className="text-primary">.</span>
             </span>
           </Link>
 
           <ul className="hidden items-center gap-1 sm:flex">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -135,12 +153,19 @@ export function LandingNavbar({
           </ul>
 
           <div className="ml-auto flex items-center gap-2">
-            <ThemeToggle />
             <Link
-              href="/#contact"
+              href={languageHref}
+              aria-label={copy.languageLabel}
+              className="inline-flex h-7 shrink-0 items-center justify-center rounded-lg px-1.5 text-[12px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {isSpanish ? "EN" : "ES"}
+            </Link>
+            <ThemeToggle locale={locale} />
+            <Link
+              href={`${homeHref}#contact`}
               className="inline-flex h-7 shrink-0 items-center rounded-lg bg-primary px-3.5 text-[13px] font-semibold tracking-tight text-white transition-opacity hover:opacity-80"
             >
-              Get in touch
+              {copy.contact}
             </Link>
 
             <button
@@ -148,7 +173,7 @@ export function LandingNavbar({
               onClick={() => setOpen((value) => !value)}
               aria-expanded={open}
               aria-controls={MENU_ID}
-              aria-label="Toggle menu"
+              aria-label={copy.menuLabel}
               className="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground sm:hidden"
             >
               {/* Two bars folding into an X. `justify-between` inside a 10px
@@ -189,7 +214,7 @@ export function LandingNavbar({
         >
           <div className="overflow-hidden px-4">
             <ul className="space-y-0.5  pb-3">
-              {NAV.map((item, index) => (
+              {nav.map((item, index) => (
                 <li
                   key={item.href}
                   className={cn(

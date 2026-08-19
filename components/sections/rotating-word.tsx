@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /**
@@ -11,9 +12,8 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
  *  the drum, the sizing and the timing all follow automatically.
  * ────────────────────────────────────────────────────────────────
  */
-const WORDS = [
+const WORD_STYLES = [
   {
-    text: "Designer",
     // Gradient poured through the glyphs.
     className: cn(
       "[background-image:linear-gradient(135deg,#A855F7_0%,#6366F1_45%,#c6005c_65%,var(--background)_95%)]",
@@ -21,7 +21,6 @@ const WORDS = [
     ),
   },
   {
-    text: "Specialist",
     // Filled with the page colour, held together by an outline.
     className: cn(
       "text-background",
@@ -30,7 +29,6 @@ const WORDS = [
     ),
   },
   {
-    text: "Builder",
     // Hazard stripes, crawling.
     className: cn(
       "[background-image:repeating-linear-gradient(45deg,#FBBF24_0px,#FBBF24_10px,#F97316_10px,#F97316_20px)]",
@@ -43,7 +41,18 @@ const WORDS = [
 /** How long each word holds before the drum turns. */
 const INTERVAL = 2600;
 
-export function RotatingWord({ className }: { className?: string }) {
+export function RotatingWord({
+  className,
+  locale = "en",
+}: {
+  className?: string;
+  locale?: Locale;
+}) {
+  const copy = LANDING_COPY[locale].hero;
+  const words = copy.rotatingWords.map((text, index) => ({
+    text,
+    className: WORD_STYLES[index].className,
+  }));
   const reducedMotion = useReducedMotion();
   const [state, setState] = useState({ index: 0, previous: -1 });
   const [width, setWidth] = useState<number | null>(null);
@@ -55,13 +64,13 @@ export function RotatingWord({ className }: { className?: string }) {
 
     const id = setInterval(() => {
       setState((current) => ({
-        index: (current.index + 1) % WORDS.length,
+        index: (current.index + 1) % words.length,
         previous: current.index,
       }));
     }, INTERVAL);
 
     return () => clearInterval(id);
-  }, [reducedMotion]);
+  }, [reducedMotion, words.length]);
 
   // The box tracks the live word's width so "Product" glides rather than
   // jumping. ResizeObserver reports the initial size on observe(), so there
@@ -78,8 +87,8 @@ export function RotatingWord({ className }: { className?: string }) {
     return () => observer.disconnect();
   }, []);
 
-  const active = WORDS[state.index];
-  const leaving = state.previous >= 0 ? WORDS[state.previous] : null;
+  const active = words[state.index];
+  const leaving = state.previous >= 0 ? words[state.previous] : null;
 
   return (
     <span
@@ -100,7 +109,7 @@ export function RotatingWord({ className }: { className?: string }) {
 
       {/* A stable heading for assistive tech, instead of a word that
           changes under the reader every few seconds. */}
-      <span className="sr-only">Designer, Specialist and Builder</span>
+      <span className="sr-only">{copy.rotatingLabel}</span>
 
       {leaving ? (
         <span

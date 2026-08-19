@@ -3,11 +3,9 @@ import { ParticlePortrait } from "@/components/backgrounds/particle-portrait";
 import { GMAIL_MARK, LINKEDIN_MARK, X_MARK } from "@/components/icons/brand";
 import { ParticleIcon } from "@/components/icons/particle-icon";
 import { RevealText } from "@/components/scroll/reveal-text";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 
 const EMAIL = "matias@monzalvo.com";
-
-const COPY =
-  "I'm open to working on innovative and ambitious projects with meaningful impact.";
 
 const CHANNELS = [
   { label: "Email", mark: GMAIL_MARK, value: EMAIL, href: `mailto:${EMAIL}` },
@@ -25,7 +23,14 @@ const CHANNELS = [
   },
 ];
 
-export function Contact() {
+export function Contact({ locale = "en" }: { locale?: Locale }) {
+  const copy = LANDING_COPY[locale].contact;
+  const channels = CHANNELS.map((channel) =>
+    channel.label === "Email" && locale === "es"
+      ? { ...channel, label: "Correo electrónico" }
+      : channel,
+  );
+
   return (
     <section
       id="contact"
@@ -41,7 +46,7 @@ export function Contact() {
           <div className="flex items-center gap-2 text-subtle mb-4">
             <Plane2 size={24} weight="Filled" strokeWidth={1.5} />
             <span className="text-lg text-muted-foreground text-medium tracking-tight">
-              Get in touch
+              {copy.heading}
             </span>
           </div>
           {/*
@@ -53,7 +58,7 @@ export function Contact() {
             approach to finish.
           */}
           <RevealText
-            text={COPY}
+            text={copy.description}
             end="bottom 75%"
             className="text-balance text-2xl font-medium leading-[1.2] tracking-tight text-foreground sm:text-3xl md:text-4xl md:leading-[1.15]"
           />
@@ -64,7 +69,7 @@ export function Contact() {
           their side: the mark leads and the value sits beside it.
         */}
         <div className="flex flex-col gap-2">
-          {CHANNELS.map((channel) => (
+          {channels.map((channel) => (
             <a
               key={channel.label}
               href={channel.href}

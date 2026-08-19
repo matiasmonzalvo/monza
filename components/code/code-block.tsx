@@ -4,6 +4,7 @@ import { Highlight, type PrismTheme } from "prism-react-renderer";
 import { useEffect, useState } from "react";
 import { Check, Copy } from "reicon-react";
 import { cn } from "@/lib/cn";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 
 /**
  * Every colour is a CSS variable, so one theme object serves both schemes:
@@ -61,12 +62,14 @@ export function CodeBlock({
   className,
   language = "tsx",
   maxHeight = "none",
+  locale = "en",
 }: {
   code: string;
   filename?: string;
   className?: string;
   language?: string;
   maxHeight?: string;
+  locale?: Locale;
 }) {
   return (
     <div className={cn("flex min-w-0 flex-col", className)}>
@@ -74,7 +77,7 @@ export function CodeBlock({
         <span className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-subtle">
           {filename ?? "Code"}
         </span>
-        <CopyButton value={code} />
+        <CopyButton value={code} locale={locale} />
       </div>
 
       {/* Only ever scrolls vertically — long lines wrap instead. */}
@@ -121,8 +124,15 @@ export function CodeBlock({
   );
 }
 
-export function CopyButton({ value }: { value: string }) {
+export function CopyButton({
+  value,
+  locale = "en",
+}: {
+  value: string;
+  locale?: Locale;
+}) {
   const [copied, setCopied] = useState(false);
+  const copy = LANDING_COPY[locale].componentShowcase;
 
   useEffect(() => {
     if (!copied) return;
@@ -154,12 +164,12 @@ export function CopyButton({ value }: { value: string }) {
             aria-hidden="true"
             className="text-success"
           />
-          Copied
+          {copy.copied}
         </>
       ) : (
         <>
           <Copy size={14} weight="Outline" aria-hidden="true" />
-          Copy
+          {copy.copy}
         </>
       )}
     </button>

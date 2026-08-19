@@ -5,8 +5,9 @@ import { useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { GUTTER } from "@/components/layout/grid";
+import { LANDING_COPY, type Locale } from "@/lib/i18n";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
-import { WORK } from "@/lib/work";
+import { getWork } from "@/lib/work";
 
 /**
  * ────────────────────────────────────────────────────────────────
@@ -103,7 +104,9 @@ const HEADING = {
 const fluid = (min: number, svh: number, max: number) =>
   `clamp(${min}px, ${svh}svh, ${max}px)`;
 
-export function Work() {
+export function Work({ locale = "en" }: { locale?: Locale }) {
+  const copy = LANDING_COPY[locale].work;
+  const work = getWork(locale);
   const sectionRef = useRef<HTMLElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -286,11 +289,10 @@ export function Work() {
               over. */}
           <div className="flex flex-col items-center justify-center gap-3 px-6 pb-20 pt-20 text-center sm:px-8 md:gap-[var(--head-gap)] md:pb-12 md:pt-[var(--head-pt)]">
             <h2 className="text-4xl font-medium leading-[1.05] tracking-tighter text-foreground sm:text-6xl lg:text-7xl">
-              Featured Work
+              {copy.heading}
             </h2>
             <p className="md:max-w-xl text-base text-pretty md:text-lg leading-relaxed text-muted-foreground">
-              Sites, products and the systems behind them — {WORK.length}{" "}
-              projects shipped end to end.
+              {copy.description(work.length)}
             </p>
           </div>
         </div>
@@ -312,7 +314,7 @@ export function Work() {
           ref={trackRef}
           className="flex w-max items-start gap-6 px-[max(1.5rem,var(--rail,0px))] py-8 sm:gap-5"
         >
-          {WORK.map((item) => (
+          {work.map((item) => (
             <article
               key={item.slug}
               // The card is sized off its shot, not the other way round: a
@@ -338,7 +340,7 @@ export function Work() {
                     rounding can leave rather than letterbox it. */}
                   <Image
                     src={item.image}
-                    alt={`Screenshot of ${item.title}`}
+                    alt={copy.imageAlt(item.title)}
                     fill
                     sizes="(min-width: 768px) 60vw, 90vw"
                     placeholder="blur"
