@@ -20,8 +20,13 @@ export function Hero({ locale = "en" }: { locale?: Locale }) {
     <section id="top" className="relative">
       <div className="relative z-10 px-6 pt-24 pb-14 text-center sm:px-8 sm:py-32 lg:pt-32 lg:pb-20">
         <div className="flex items-center justify-center gap-2 text-subtle mb-4">
-          <StarSparkle size={24} weight="Filled" strokeWidth={1.5} />
-          <span className="text-lg text-muted-foreground text-medium tracking-tight">
+          <StarSparkle
+            size={20}
+            weight="Filled"
+            strokeWidth={1.5}
+            className="sm:size-6"
+          />
+          <span className="text-base text-muted-foreground text-medium tracking-tight sm:text-lg">
             {copy.welcome}
           </span>
         </div>

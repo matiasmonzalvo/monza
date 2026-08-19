@@ -25,8 +25,13 @@ export function About({ locale = "en" }: { locale?: Locale }) {
       <div className="px-6 pt-12 sm:px-8 md:pt-32 md:pb-0">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-2 text-subtle mb-4">
-            <Handshake size={24} weight="Filled" strokeWidth={1.5} />
-            <span className="text-lg text-muted-foreground text-medium tracking-tight">
+            <Handshake
+              size={20}
+              weight="Filled"
+              strokeWidth={1.5}
+              className="sm:size-6"
+            />
+            <span className="text-base text-muted-foreground text-medium tracking-tight sm:text-lg">
               {copy.intro}
             </span>
           </div>

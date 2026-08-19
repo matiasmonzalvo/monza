@@ -44,8 +44,13 @@ export function Contact({ locale = "en" }: { locale?: Locale }) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
         <div>
           <div className="flex items-center gap-2 text-subtle mb-4">
-            <Plane2 size={24} weight="Filled" strokeWidth={1.5} />
-            <span className="text-lg text-muted-foreground text-medium tracking-tight">
+            <Plane2
+              size={20}
+              weight="Filled"
+              strokeWidth={1.5}
+              className="sm:size-6"
+            />
+            <span className="text-base text-muted-foreground text-medium tracking-tight sm:text-lg">
               {copy.heading}
             </span>
           </div>
