@@ -670,7 +670,7 @@ function AiScene({
         {PULSE.schedule.map((departure) => (
           <span
             key={`${departure.row}-${departure.at}`}
-            className="animate-star-shine absolute inset-0"
+            className="animate-star-shine absolute inset-0 [--star-shine-color:var(--border-strong)] dark:[--star-shine-color:var(--foreground)]"
             style={
               {
                 "--pulse-period": `${PULSE.period}s`,

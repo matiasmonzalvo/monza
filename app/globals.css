@@ -252,12 +252,13 @@
 
      0.55 is the ceiling on purpose: the star underneath has to stay readable
      through it, or this stops being a glint passing over something and becomes
-     a lid closing over it. */
+     a lid closing over it. The component supplies a theme-aware colour: a
+     light grey in light mode and the original foreground in dark mode. */
   .animate-star-shine {
     background-image: linear-gradient(
       to bottom right,
       transparent 44%,
-      var(--foreground) 50%,
+      var(--star-shine-color, var(--foreground)) 50%,
       transparent 56%
     );
     background-size: 300% 300%;

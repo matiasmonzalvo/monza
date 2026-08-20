@@ -26,7 +26,7 @@ export const LANDING_COPY = {
         "22yo design engineer based in Buenos Aires. I turn complex problems into clear, useful digital products, moving from early strategy to shipped details and building the systems that keep every experience coherent as it grows.\nThis is the tool I work with every day.",
       facts: [
         { value: "6 years", label: "Designing products" },
-        { value: "40+", label: "Shipped features" },
+        { value: "12+", label: "Featured Projects" },
         { value: "Based in", label: "Buenos Aires, Argentina" },
       ],
     },
@@ -103,7 +103,7 @@ export const LANDING_COPY = {
         "Soy un design engineer de 22 años que vive en Buenos Aires. Convierto problemas complejos en productos digitales claros y útiles: avanzo desde la estrategia inicial hasta los detalles del lanzamiento y construyo los sistemas que mantienen cada experiencia coherente a medida que crece.\nEsta es la herramienta con la que trabajo todos los días.",
       facts: [
         { value: "6 años", label: "Diseñando productos" },
-        { value: "40+", label: "Funcionalidades lanzadas" },
+        { value: "12+", label: "Proyectos Destacados" },
         { value: "Vivo en", label: "Buenos Aires, Argentina" },
       ],
     },
